@@ -37,12 +37,12 @@ function App() {
       character.name = playerName;
 
       try {
-        const res = await fetch('http://localhost:3001/message', {
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: playerName, message: 'start' }),
+          body: JSON.stringify({ name: playerName, message: msg }), // or 'start' for the first call
         });
-
+        
         const data = await res.json();
         const aiMessage = { sender: 'ai', text: data.response };
         setMessages([aiMessage]);
@@ -78,11 +78,12 @@ function App() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:3001/message', {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: playerName, message: msg }),
+        body: JSON.stringify({ name: playerName, message: msg }), // or 'start' for the first call
       });
+      
 
       const data = await res.json();
       const aiMessage = { sender: 'ai', text: data.response };
