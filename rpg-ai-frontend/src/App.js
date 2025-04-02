@@ -106,25 +106,29 @@ function App() {
 
   const handleRollCheck = () => {
     if (!rollPrompt) return;
-
+  
     const statMap = {
       Strength: 'STR', Dexterity: 'DEX', Constitution: 'CON', Intelligence: 'INT',
       Wisdom: 'WIS', Charisma: 'CHA', Arcana: 'INT', Nature: 'INT', Perception: 'WIS',
       Insight: 'WIS', History: 'INT', Investigation: 'INT'
     };
-
+  
     const statKey = statMap[rollPrompt.ability] || 'INT';
     const roll = Math.floor(Math.random() * 20) + 1;
     const mod = statModifier(character.stats[statKey]);
     const total = roll + mod;
-
-    const rollResult = `🎲 ${rollPrompt.ability} check: Rolled ${roll} + ${mod} = ${total}`;
-    const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.`;
-
+  
+    // Display message in chat
+    const rollResult = `🎲 ${rollPrompt.ability} check${rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ''}: Rolled ${roll} + ${mod} = ${total}`;
     setMessages((prev) => [...prev, { sender: 'player', text: rollResult }]);
+  
+    // Send explicit context to the AI
+    const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.`;
     sendMessage(playerMsg);
+  
     setRollPrompt(null);
   };
+  
 
   return (
     <div className="App">
