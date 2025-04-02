@@ -7,7 +7,10 @@ require('dotenv').config();
 const { OpenAI } = require('openai');
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-app.use(cors());
+// ✅ Allow Netlify origin
+app.use(cors({
+  origin: 'https://dancing-dolphin-3d57e1.netlify.app',
+}));
 app.use(express.json());
 
 app.post('/message', async (req, res) => {
