@@ -183,7 +183,8 @@ function App() {
               </div>
 
               {questionMode && (
-                <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }}>
+                <form onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}>
+
                   <input
                     type="text"
                     placeholder="Ask the DM a question..."
