@@ -35,14 +35,14 @@ function App() {
     if (playerName.trim()) {
       setSubmitted(true);
       character.name = playerName;
-
+  
       try {
         const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: playerName, message: msg }), // or 'start' for the first call
+          body: JSON.stringify({ name: playerName, message: 'start' }), // ✅ FIXED
         });
-        
+  
         const data = await res.json();
         const aiMessage = { sender: 'ai', text: data.response };
         setMessages([aiMessage]);
@@ -54,6 +54,7 @@ function App() {
       }
     }
   };
+  
 
   const detectRollRequest = (text) => {
     const match = text.match(/make (an?|a)?\s*(\w+)\s+check(?:\s*\(DC\s*(\d+)\))?/i);
