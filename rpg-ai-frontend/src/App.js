@@ -132,8 +132,10 @@ function App() {
     const total = roll + mod;
   
     const rollResult = `🎲 ${rollPrompt.ability} check (DC ${rollPrompt.dc}): Rolled ${roll} + ${mod} = ${total}`;
-    const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.` +
-      (lastRollContext ? ` This was for the following prompt: "${lastRollContext}"` : '');
+    const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check. 
+    This was in response to my question: "${lastPlayerQuestion}" 
+    and the DM's prompt: "${lastRollContext}"`;
+
   
     setMessages((prev) => [...prev, { sender: 'player', text: rollResult }]);
     sendMessage(playerMsg);
