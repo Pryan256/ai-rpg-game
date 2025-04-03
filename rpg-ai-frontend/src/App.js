@@ -100,21 +100,27 @@ function App() {
   const streamMessage = async (text) => {
     const words = text.split(' ');
     let accumulated = '';
-    setMessages((prev) => {
-      const newMessages = [...prev, { sender: 'ai', text: '' }];
-      return newMessages;
-    });
+    let currentText = '';
+  
+    setMessages(prev => [...prev, { sender: 'ai', text: '' }]);
+  
     for (const word of words) {
-      accumulated += word + ' ';
-      setMessages((prev) => {
-        const updated = [...prev];
-        const last = updated[updated.length - 1];
-        if (last.sender === 'ai') last.text = accumulated;
-        return updated;
+      currentText += word + ' ';
+      setMessages(prev => {
+        const newMessages = [...prev];
+        const last = newMessages[newMessages.length - 1];
+        if (last?.sender === 'ai') {
+          newMessages[newMessages.length - 1] = {
+            ...last,
+            text: currentText
+          };
+        }
+        return newMessages;
       });
-      await new Promise((r) => setTimeout(r, 40));
+      await new Promise(resolve => setTimeout(resolve, 40));
     }
   };
+  
 
   const handleNameSubmit = async (e) => {
     e.preventDefault();
