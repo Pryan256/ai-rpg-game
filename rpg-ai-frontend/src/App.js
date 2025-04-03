@@ -100,18 +100,20 @@ function App() {
     const words = text.split(' ');
     let accumulated = '';
     setMessages((prev) => [...prev, { sender: 'ai', text: '' }]);
-
-    for (let i = 0; i < words.length; i++) {
-      accumulated += words[i] + ' ';
-      setMessages((prev) => {
-        const updated = [...prev];
-        const last = updated[updated.length - 1];
-        if (last.sender === 'ai') last.text = accumulated;
-        return updated;
-      });
-      await new Promise((r) => setTimeout(r, 40));
-    }
+  
+    words.forEach((word, index) => {
+      setTimeout(() => {
+        accumulated += word + ' ';
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[updated.length - 1];
+          if (last.sender === 'ai') last.text = accumulated;
+          return updated;
+        });
+      }, index * 40); // simulate stream delay
+    });
   };
+  
 
   const handleNameSubmit = async (e) => {
     e.preventDefault();
