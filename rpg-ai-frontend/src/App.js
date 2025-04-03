@@ -29,7 +29,13 @@ function App() {
   const [questionMode, setQuestionMode] = useState(false);
   const [lastRollContext, setLastRollContext] = useState('');
   const [lastPlayerQuestion, setLastPlayerQuestion] = useState('');
-  const [memory, setMemory] = useState(null);
+  const [memory, setMemory] = useState({
+    quest: '',
+    knownCharacters: [],
+    knownItems: [],
+    knownLocations: [],
+    knownLaws: []
+  });
 
   const statModifier = (statScore) => Math.floor((statScore - 10) / 2);
 
@@ -51,6 +57,21 @@ function App() {
     }
   };
 
+  const updateMemoryFromResponse = (text) => {
+    const newMemory = { ...memory };
+    const characterMatches = [...text.matchAll(/(?:I am|My name is) ([A-Z][a-z]+(?: [A-Z][a-z]+)?)/g)].map(match => match[1]);
+    const itemMatches = [...text.matchAll(/\b(?:Potion|Scroll|Amulet|Gem|Blade|Sword|Ring)\b/gi)].map(m => m[0]);
+    const locationMatches = [...text.matchAll(/\b(?:Forest|Cave|Tower|Village|Keep|Citadel|Temple)\b/gi)].map(m => m[0]);
+    const lawMatches = [...text.matchAll(/\b(?:forbidden|illegal|punishable|law of [A-Z][a-z]+)\b/gi)].map(m => m[0]);
+
+    newMemory.knownCharacters = [...new Set([...newMemory.knownCharacters, ...characterMatches])];
+    newMemory.knownItems = [...new Set([...newMemory.knownItems, ...itemMatches])];
+    newMemory.knownLocations = [...new Set([...newMemory.knownLocations, ...locationMatches])];
+    newMemory.knownLaws = [...new Set([...newMemory.knownLaws, ...lawMatches])];
+
+    setMemory(newMemory);
+  };
+
   const handleNameSubmit = async (e) => {
     e.preventDefault();
     if (playerName.trim()) {
@@ -67,7 +88,7 @@ function App() {
         const aiMessage = { sender: 'ai', text: data.response };
         setMessages([aiMessage]);
         setOptions(data.options || []);
-        setMemory(data.memory || null);
+        updateMemoryFromResponse(data.response);
         detectRollRequest(data.response);
       } catch (error) {
         console.error('Error:', error);
@@ -97,7 +118,7 @@ function App() {
       const aiMessage = { sender: 'ai', text: data.response };
       setMessages((prev) => [...prev, aiMessage]);
       setOptions(data.options || []);
-      setMemory(data.memory || null);
+      updateMemoryFromResponse(data.response);
       detectRollRequest(data.response);
     } catch (error) {
       console.error('Error:', error);
@@ -124,7 +145,7 @@ function App() {
     const mod = statModifier(character.stats[statKey]);
     const total = roll + mod;
     const rollResult = `🎲 ${rollPrompt.ability} check${rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ''}: Rolled ${roll} + ${mod} = ${total}`;
-    const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.\nThis was in response to my question: "${lastPlayerQuestion}" and the DM's prompt: "${lastRollContext}"`;
+    const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.\nThis was in response to my question: \"${lastPlayerQuestion}\" and the DM's prompt: \"${lastRollContext}\"`;
     setMessages((prev) => [...prev, { sender: 'player', text: rollResult }]);
     sendMessage(playerMsg);
     setRollPrompt(null);
