@@ -39,6 +39,23 @@ function App() {
 
   const statModifier = (statScore) => Math.floor((statScore - 10) / 2);
 
+  const clearMemory = async () => {
+    try {
+      await fetch(`${process.env.REACT_APP_API_URL}/clear-memory`, {
+        method: 'POST'
+      });
+      setMemory({
+        quest: '',
+        knownCharacters: [],
+        knownItems: [],
+        knownLocations: [],
+        knownLaws: []
+      });
+    } catch (err) {
+      console.error('Failed to clear memory:', err);
+    }
+  };
+
   const detectRollRequest = (text) => {
     const match = text.match(/make (an?|a)?\s*(\w+)\s+check(?:\s*\(DC\s*(\d+)\))?/i);
     if (match) {
@@ -209,6 +226,7 @@ function App() {
                   <button key={i} onClick={() => handleOptionClick(option)}>{option}</button>
                 ))}
                 <button onClick={() => setQuestionMode(true)}>❓ Ask a question</button>
+                <button onClick={clearMemory}>🧼 Clear Memory</button>
               </div>
 
               {questionMode && (
