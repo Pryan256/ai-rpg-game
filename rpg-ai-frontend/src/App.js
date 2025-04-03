@@ -236,17 +236,6 @@ function App() {
                 {loading && <div className="ai">DM is thinking...</div>}
               </div>
 
-              {highlights.length > 0 && (
-                <div className="highlight-box">
-                  <h2>🧠 New Highlights</h2>
-                  <ul>
-                    {highlights.map((h, i) => (
-                      <li key={i}><strong>{h.type}:</strong> {h.text}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
               {rollPrompt && (
                 <div className="roll-section">
                   {lastRollContext && (
