@@ -145,5 +145,37 @@ button:hover {
   color: #555;
 }
 
+.main-layout {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  align-items: flex-start;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.memory-sidebar {
+  width: 250px;
+  padding: 1rem;
+  border: 2px solid #d6bfa7;
+  background-color: #fffaf4;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  font-size: 0.9rem;
+  text-align: left;
+}
+
+.memory-sidebar h2 {
+  margin-top: 0;
+  font-size: 1.3rem;
+  color: #6b4b2d;
+}
+
+.memory-sidebar p {
+  margin: 0.5rem 0;
+  line-height: 1.4;
+}
+
+
 
 
