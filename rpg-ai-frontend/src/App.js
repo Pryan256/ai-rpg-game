@@ -27,6 +27,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [rollPrompt, setRollPrompt] = useState(null);
   const [questionMode, setQuestionMode] = useState(false);
+  const [lastRollContext, setLastRollContext] = useState('');
+
 
   const statModifier = (statScore) => Math.floor((statScore - 10) / 2);
 
@@ -61,11 +63,22 @@ function App() {
     if (match) {
       const ability = match[2].charAt(0).toUpperCase() + match[2].slice(1).toLowerCase();
       const dc = match[3] ? parseInt(match[3]) : null;
+  
+      // Save the context sentence
+      const sentenceMatch = text.match(/.*?make.*?check.*?[\.\?!]/i);
+      if (sentenceMatch) {
+        setLastRollContext(sentenceMatch[0]);
+      } else {
+        setLastRollContext('');
+      }
+  
       setRollPrompt({ ability, dc });
     } else {
       setRollPrompt(null);
+      setLastRollContext('');
     }
   };
+  
 
   const sendMessage = async (msg = input) => {
     if (!msg.trim()) return;
@@ -118,16 +131,16 @@ function App() {
     const mod = statModifier(character.stats[statKey]);
     const total = roll + mod;
   
-    // Display message in chat
-    const rollResult = `🎲 ${rollPrompt.ability} check${rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ''}: Rolled ${roll} + ${mod} = ${total}`;
+    const rollResult = `🎲 ${rollPrompt.ability} check (DC ${rollPrompt.dc}): Rolled ${roll} + ${mod} = ${total}`;
+    const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.` +
+      (lastRollContext ? ` This was for the following prompt: "${lastRollContext}"` : '');
+  
     setMessages((prev) => [...prev, { sender: 'player', text: rollResult }]);
-  
-    // Send explicit context to the AI
-    const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.`;
     sendMessage(playerMsg);
-  
     setRollPrompt(null);
+    setLastRollContext('');
   };
+  
   
 
   return (
@@ -175,10 +188,18 @@ function App() {
               </div>
 
               {rollPrompt && (
-                <button onClick={handleRollCheck}>
-                  🎲 Roll {rollPrompt.ability} Check{rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ''}
-                </button>
+                <div className="roll-section">
+                  {lastRollContext && (
+                    <p className="roll-context">
+                      🧠 Rolling for: <em>{lastRollContext}</em>
+                    </p>
+                  )}
+                  <button onClick={handleRollCheck}>
+                    🎲 Roll {rollPrompt.ability} Check{rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ''}
+                  </button>
+                </div>
               )}
+
 
               <div className="options">
                 {options.map((option, i) => (

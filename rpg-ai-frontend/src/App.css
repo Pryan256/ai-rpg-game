@@ -134,4 +134,16 @@ button:hover {
   max-width: 500px;
 }
 
+.roll-section {
+  margin: 1rem 0;
+  text-align: left;
+}
+
+.roll-context {
+  margin-bottom: 0.5rem;
+  font-style: italic;
+  color: #555;
+}
+
+
 
