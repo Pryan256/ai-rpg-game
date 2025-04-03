@@ -65,7 +65,7 @@ function App() {
       const dc = match[3] ? parseInt(match[3]) : null;
   
       // Save the context sentence
-      const sentenceMatch = text.match(/.*?make.*?check.*?[\.\?!]/i);
+      const sentenceMatch = text.match(/.*?make.*?check.*?[.?!]/i);
       if (sentenceMatch) {
         setLastRollContext(sentenceMatch[0]);
       } else {
