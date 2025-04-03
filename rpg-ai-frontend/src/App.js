@@ -124,7 +124,7 @@ function App() {
     const mod = statModifier(character.stats[statKey]);
     const total = roll + mod;
     const rollResult = `🎲 ${rollPrompt.ability} check${rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ''}: Rolled ${roll} + ${mod} = ${total}`;
-    const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.\nThis was in response to my question: \"${lastPlayerQuestion}\" and the DM's prompt: \"${lastRollContext}\"`;
+    const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.\nThis was in response to my question: "${lastPlayerQuestion}" and the DM's prompt: "${lastRollContext}"`;
     setMessages((prev) => [...prev, { sender: 'player', text: rollResult }]);
     sendMessage(playerMsg);
     setRollPrompt(null);
