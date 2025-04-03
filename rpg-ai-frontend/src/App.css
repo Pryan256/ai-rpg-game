@@ -179,16 +179,24 @@ button:hover {
 .highlight-character {
   background-color: rgba(255, 165, 0, 0.3);
   color: rgba(50, 32, 0, 1);
+  border-radius: 10px;
+  padding:4px;
 }
 .highlight-location {
   background-color: rgba(100, 149, 237, 0.3);
   color: rgb(16, 36, 71);
+  border-radius: 10px;
+  padding:4px;
 }
 .highlight-item {
   background-color: rgba(60, 179, 113, 0.3);
   color: rgb(13, 60, 34);
+  border-radius: 10px;
+  padding:4px;
 }
 .highlight-law {
   background-color: rgba(221, 160, 221, 0.3);
   color: rgb(41, 21, 41);
+  border-radius: 10px;
+  padding:4px;
 }
