@@ -20,13 +20,10 @@ const character = {
 
 function App() {
   const [playerName, setPlayerName] = useState('');
-  const [submitted, setSubmitted] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [options, setOptions] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [rollPrompt, setRollPrompt] = useState(null);
-  const [questionMode, setQuestionMode] = useState(false);
   const [lastRollContext, setLastRollContext] = useState('');
   const [lastPlayerQuestion, setLastPlayerQuestion] = useState('');
   const [memory, setMemory] = useState({
@@ -114,14 +111,14 @@ function App() {
   const streamMessage = async (text) => {
     const words = text.split(' ');
     let accumulated = '';
-  
+
     const newMessages = [...messages];
     let last = newMessages[newMessages.length - 1];
     if (last?.sender !== 'ai') {
       newMessages.push({ sender: 'ai', text: '' });
       last = newMessages[newMessages.length - 1];
     }
-  
+
     for (const word of words) {
       accumulated += word + ' ';
       last.text = accumulated;
@@ -129,12 +126,10 @@ function App() {
       await new Promise((r) => setTimeout(r, 40));
     }
   };
-  
 
   const handleNameSubmit = async (e) => {
     e.preventDefault();
     if (playerName.trim()) {
-      setSubmitted(true);
       character.name = playerName;
 
       try {
@@ -169,7 +164,6 @@ function App() {
     setRollPrompt(null);
     setQuestionMode(false);
     setLastPlayerQuestion(msg);
-    setLoading(true);
 
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
@@ -192,8 +186,6 @@ function App() {
       console.error('Error:', error);
       setMessages((prev) => [...prev, { sender: 'ai', text: '⚠️ Something went wrong talking to the Dungeon Master.' }]);
     }
-
-    setLoading(false);
   };
 
   const handleOptionClick = (option) => {
