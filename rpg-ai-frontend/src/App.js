@@ -98,15 +98,15 @@ function App() {
 
   const streamMessage = async (text) => {
     const words = text.split(' ');
-    let currentText = '';
+    let accumulated = '';
     setMessages((prev) => [...prev, { sender: 'ai', text: '' }]);
 
-    for (const word of words) {
-      currentText += word + ' ';
+    for (let i = 0; i < words.length; i++) {
+      accumulated += words[i] + ' ';
       setMessages((prev) => {
         const updated = [...prev];
         const last = updated[updated.length - 1];
-        if (last.sender === 'ai') last.text = currentText;
+        if (last.sender === 'ai') last.text = accumulated;
         return updated;
       });
       await new Promise((r) => setTimeout(r, 40));
@@ -226,12 +226,6 @@ function App() {
                   />
                 </div>
               ))}
-              {loading && (
-                <div className="dm-thinking">
-                  🔮 The DM is weaving your fate...
-                  <span className="dots"><span>.</span><span>.</span><span>.</span></span>
-                </div>
-              )}
             </div>
 
             {rollPrompt && (
@@ -265,15 +259,11 @@ function App() {
 
           <div className="column memory-sidebar">
             <h2>📖 World Memory</h2>
-            {memory && (
-              <div>
-                <p><strong>🎯 Quest:</strong> {memory.quest || 'None yet'}</p>
-                <p><strong>🎒 Items:</strong> {memory.knownItems.join(', ') || 'None'}</p>
-                <p><strong>🧑‍🤝‍🧑 Characters:</strong> {memory.knownCharacters.join(', ') || 'None'}</p>
-                <p><strong>🗺 Locations:</strong> {memory.knownLocations.join(', ') || 'None'}</p>
-                <p><strong>📜 Laws:</strong> {memory.knownLaws.join(', ') || 'None'}</p>
-              </div>
-            )}
+            <p><strong>🎯 Quest:</strong> {memory.quest || 'None yet'}</p>
+            <p><strong>🎒 Items:</strong> {memory.knownItems.join(', ') || 'None'}</p>
+            <p><strong>🧑‍🤝‍🧑 Characters:</strong> {memory.knownCharacters.join(', ') || 'None'}</p>
+            <p><strong>🗺 Locations:</strong> {memory.knownLocations.join(', ') || 'None'}</p>
+            <p><strong>📜 Laws:</strong> {memory.knownLaws.join(', ') || 'None'}</p>
           </div>
         </div>
       )}
