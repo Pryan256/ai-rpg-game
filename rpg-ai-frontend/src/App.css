@@ -1,88 +1,47 @@
+/* ========== Global Layout ========== */
 .App {
   font-family: 'Georgia', serif;
-  text-align: center;
   background-color: #fef8f1;
   min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* ========== Header ========== */
+h1 {
+  color: #6b4b2d;
+  text-align: center;
+  padding: 2rem 1rem 0;
+  font-size: 2rem;
+}
+
+/* ========== Grid Layout ========== */
+.main-grid {
+  display: grid;
+  grid-template-columns: 250px 1fr 250px;
+  gap: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
   padding: 2rem;
 }
 
-h1 {
-  color: #6b4b2d;
-  margin-bottom: 2rem;
+@media (max-width: 1024px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+
+  .column {
+    width: 100%;
+  }
 }
 
-/* NEW container styling */
-.container {
-  max-width: 1080px;
-  margin: 0 auto;
-  background: #fffaf4;
-  border: 2px solid #d6bfa7;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.chat-box {
-  background: #fff;
-  border: 1px solid #ddd;
-  padding: 1rem;
-  height: 300px;
-  overflow-y: auto;
-  text-align: left;
-  margin-bottom: 1rem;
-}
-
-.ai {
-  color: #6b4b2d;
-}
-
-.player {
-  color: #003049;
-}
-
-input {
-  width: 100%;
-  padding: 0.5rem;
-  font-size: 1rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-button {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  background: #6b4b2d;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  margin: 0.5rem;
-}
-
-button:hover {
-  background: #593a21;
-}
-
-.options {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.main-content {
-  display: flex;
-  gap: 2rem;
-  justify-content: center;
-  align-items: flex-start;
-}
-
+/* ========== Character Sheet ========== */
 .character-sheet {
-  width: 250px;
   padding: 1rem;
   border: 2px solid #d6bfa7;
-  border-radius: 12px;
   background-color: #fffaf4;
+  border-radius: 12px;
   font-size: 0.9rem;
   text-align: left;
 }
@@ -102,60 +61,33 @@ button:hover {
   margin-bottom: 0.25rem;
 }
 
+/* ========== Game Area ========== */
 .game-area {
   flex: 1;
 }
 
-.ask-section {
-  margin-top: 1rem;
+.chat-box {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 1rem;
+  min-height: 300px;
+  max-height: 500px;
+  overflow-y: auto;
   text-align: left;
-}
-
-.question-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
-}
-
-.question-form input {
-  padding: 0.5rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
+  margin-bottom: 1rem;
   border-radius: 6px;
 }
 
-.game-area form {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 2rem auto;
-  width: 100%;
-  max-width: 500px;
+.ai {
+  color: #6b4b2d;
 }
 
-.roll-section {
-  margin: 1rem 0;
-  text-align: left;
+.player {
+  color: #003049;
 }
 
-.roll-context {
-  margin-bottom: 0.5rem;
-  font-style: italic;
-  color: #555;
-}
-
-.main-layout {
-  display: flex;
-  gap: 2rem;
-  justify-content: center;
-  align-items: flex-start;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
+/* ========== Memory Sidebar ========== */
 .memory-sidebar {
-  width: 250px;
   padding: 1rem;
   border: 2px solid #d6bfa7;
   background-color: #fffaf4;
@@ -176,6 +108,54 @@ button:hover {
   line-height: 1.4;
 }
 
+/* ========== Form and Input ========== */
+input {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+/* ========== Buttons ========== */
+button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  background: #6b4b2d;
+  color: white;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  margin: 0.3rem;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #593a21;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+/* ========== Rolls ========== */
+.roll-section {
+  margin: 1rem 0;
+  text-align: left;
+}
+
+.roll-context {
+  margin-bottom: 0.5rem;
+  font-style: italic;
+  color: #555;
+}
+
+/* ========== Highlighted Text ========== */
 .highlight-character {
   background-color: rgba(255, 165, 0, 0.3);
 }
@@ -188,6 +168,3 @@ button:hover {
 .highlight-law {
   background-color: rgba(221, 160, 221, 0.3);
 }
-
-
-
