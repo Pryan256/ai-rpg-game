@@ -76,6 +76,17 @@ function App() {
     }
   };
 
+  const highlightText = (text, highlights) => {
+    if (!Array.isArray(highlights)) return text;
+    let highlighted = text;
+    highlights.forEach(({ text: phrase, type }) => {
+      if (!phrase || typeof phrase !== 'string') return;
+      const regex = new RegExp(`\\b(${phrase.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')})\\b`, 'gi');
+      highlighted = highlighted.replace(regex, `<mark class="${type}">$1</mark>`);
+    });
+    return highlighted;
+  };
+
   const extractMemory = async (text) => {
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/extract-memory`, {
@@ -214,7 +225,12 @@ function App() {
               <div className="chat-box">
                 {messages.map((msg, i) => (
                   <div key={i} className={msg.sender}>
-                    <strong>{msg.sender === 'ai' ? 'DM' : playerName}:</strong> {msg.text}
+                    <strong>{msg.sender === 'ai' ? 'DM' : playerName}:</strong>{' '}
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: msg.sender === 'ai' ? highlightText(msg.text, highlights) : msg.text
+                      }}
+                    />
                   </div>
                 ))}
                 {loading && <div className="ai">DM is thinking...</div>}
