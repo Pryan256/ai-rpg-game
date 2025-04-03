@@ -17,6 +17,8 @@ let memory = {
   quest: '',
   knownItems: [],
   knownCharacters: [],
+  knownLocations: [],
+  knownLaws: []
 };
 
 app.use(cors({
@@ -63,6 +65,8 @@ The player is:
 - Current quest objective: ${memory.quest || 'Not yet established'}
 - Known items: ${memory.knownItems.join(', ') || 'None'}
 - Known characters: ${memory.knownCharacters.join(', ') || 'None'}
+- Known locations: ${memory.knownLocations.join(', ') || 'None'}
+- Known laws: ${memory.knownLaws.join(', ') || 'None'}
 
 🎭 DM Guidelines:
 - Only narrate the world, never describe the player taking action unless they explicitly say so.
@@ -113,15 +117,17 @@ Choices:
 
 // 🧼 Clear memory
 app.post('/clear-memory', (req, res) => {
-  const emptyMemory = {
+  memory = {
+    playerName: '',
+    lastPlayerMessage: '',
+    lastDMPrompt: '',
     quest: '',
     knownItems: [],
     knownCharacters: [],
     knownLocations: [],
     knownLaws: []
   };
-
-  fs.writeFile(memoryPath, JSON.stringify(emptyMemory, null, 2), (err) => {
+  fs.writeFile(memoryPath, JSON.stringify(memory, null, 2), (err) => {
     if (err) {
       console.error('❌ Failed to clear memory:', err);
       return res.status(500).json({ success: false });
@@ -135,36 +141,56 @@ app.post('/clear-memory', (req, res) => {
 app.post('/extract-memory', async (req, res) => {
   const { text } = req.body;
 
-  const memoryPrompt = `You are managing memory for a fantasy RPG.
-
-Given this narration, extract and return only the things the player should remember long-term.
-
-Use this exact format:
-{
-  "knownCharacters": [],
-  "knownItems": [],
-  "knownLocations": [],
-  "knownLaws": [],
-  "quest": ""
-}
-
-Only return facts that are new and relevant. If nothing should be remembered, return empty values.`
-
   try {
-    const memoryResponse = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+    const extractResponse = await openai.chat.completions.create({
+      model: 'gpt-4o',
       messages: [
-        { role: 'system', content: memoryPrompt },
-        { role: 'user', content: text }
-      ],
-      response_format: 'json'
+        {
+          role: 'system',
+          content: `You are a memory extraction assistant for a D&D game.
+Given a block of story text from a Dungeon Master, extract any notable:
+
+1. 🎯 Quest (if mentioned or implied)
+2. 🧑‍🤝‍🧑 Named characters (e.g., "Thrain Steelgrip")
+3. 🎒 Named magical or special items
+4. 🗺 Named locations (e.g., "Eldoria", "Whispering Woods")
+5. 📜 Important laws, customs, or taboos
+
+Return them as JSON like:
+{
+  "quest": "Investigate the disturbance in the Whispering Woods",
+  "knownCharacters": ["Thrain Steelgrip"],
+  "knownItems": ["Ring of Whispers"],
+  "knownLocations": ["Eldoria", "Whispering Woods"],
+  "knownLaws": ["Magic is forbidden inside the city walls"],
+  "highlights": [
+    { "text": "Thrain Steelgrip", "type": "character" },
+    { "text": "Whispering Woods", "type": "location" },
+    { "text": "Ring of Whispers", "type": "item" }
+  ]
+}`
+        },
+        {
+          role: 'user',
+          content: text
+        }
+      ]
     });
 
-    const json = memoryResponse.choices[0].message.content;
-    res.json(JSON.parse(json));
+    const parsed = JSON.parse(extractResponse.choices[0].message.content);
+
+    // Update in-memory store
+    const safe = (arr) => Array.isArray(arr) ? arr : [];
+    memory.quest = parsed.quest || memory.quest;
+    memory.knownCharacters = Array.from(new Set([...memory.knownCharacters, ...safe(parsed.knownCharacters)]));
+    memory.knownItems = Array.from(new Set([...memory.knownItems, ...safe(parsed.knownItems)]));
+    memory.knownLocations = Array.from(new Set([...memory.knownLocations, ...safe(parsed.knownLocations)]));
+    memory.knownLaws = Array.from(new Set([...memory.knownLaws, ...safe(parsed.knownLaws)]));
+
+    res.json(parsed);
   } catch (err) {
-    console.error('❌ Memory extraction failed:', err);
-    res.status(500).send('Could not extract memory.');
+    console.error('❌ Failed to extract memory:', err.message);
+    res.status(500).json({ error: 'Memory extraction failed' });
   }
 });
 
