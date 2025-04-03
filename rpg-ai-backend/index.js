@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
 const app = express();
 const port = 3001;
 
@@ -7,7 +8,8 @@ require('dotenv').config();
 const { OpenAI } = require('openai');
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// 🧠 In-memory context store
+const memoryPath = './memory.json'; // for clearing memory if needed
+
 let memory = {
   playerName: '',
   lastPlayerMessage: '',
@@ -17,7 +19,6 @@ let memory = {
   knownCharacters: [],
 };
 
-// ✅ Allow Netlify origin
 app.use(cors({
   origin: 'https://dancing-dolphin-3d57e1.netlify.app',
 }));
@@ -28,7 +29,6 @@ app.post('/message', async (req, res) => {
   memory.playerName = name;
   memory.lastPlayerMessage = message;
 
-  // 🧙 Player's character sheet
   const playerState = {
     name,
     race: 'Elf',
@@ -46,7 +46,6 @@ app.post('/message', async (req, res) => {
     inventory: ['Spellbook', 'Staff', 'Potion of Healing']
   };
 
-  // 🧠 DM system prompt
   const prompt = `You are the Dungeon Master for a Dungeons & Dragons 5e fantasy roleplaying game.
 
 The player is:
@@ -99,11 +98,7 @@ Choices:
 
     const [storyPart, choicePart] = raw.split(/Choices:/i);
     const choices = choicePart
-      ? choicePart
-          .trim()
-          .split(/\n|-/)
-          .map(line => line.trim())
-          .filter(line => line.length > 0)
+      ? choicePart.trim().split(/\n|-/).map(line => line.trim()).filter(line => line.length > 0)
       : [];
 
     res.json({
@@ -116,9 +111,7 @@ Choices:
   }
 });
 
-const fs = require('fs');
-const memoryPath = './memory.json'; // Make sure this path matches where your memory file is
-
+// 🧼 Clear memory
 app.post('/clear-memory', (req, res) => {
   const emptyMemory = {
     quest: '',
@@ -138,6 +131,42 @@ app.post('/clear-memory', (req, res) => {
   });
 });
 
+// 🔍 New: Extract memory using GPT
+app.post('/extract-memory', async (req, res) => {
+  const { text } = req.body;
+
+  const memoryPrompt = `You are managing memory for a fantasy RPG.
+
+Given this narration, extract and return only the things the player should remember long-term.
+
+Use this exact format:
+{
+  "knownCharacters": [],
+  "knownItems": [],
+  "knownLocations": [],
+  "knownLaws": [],
+  "quest": ""
+}
+
+Only return facts that are new and relevant. If nothing should be remembered, return empty values.`
+
+  try {
+    const memoryResponse = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: memoryPrompt },
+        { role: 'user', content: text }
+      ],
+      response_format: 'json'
+    });
+
+    const json = memoryResponse.choices[0].message.content;
+    res.json(JSON.parse(json));
+  } catch (err) {
+    console.error('❌ Memory extraction failed:', err);
+    res.status(500).send('Could not extract memory.');
+  }
+});
 
 app.get('/', (req, res) => {
   res.send('RPG AI backend is running!');
