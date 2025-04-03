@@ -42,8 +42,16 @@ function App() {
 
   const clearMemory = async () => {
     try {
-      await fetch(`${process.env.REACT_APP_API_URL}/clear-memory`, { method: 'POST' });
-      setMemory({ quest: '', knownCharacters: [], knownItems: [], knownLocations: [], knownLaws: [] });
+      await fetch(`${process.env.REACT_APP_API_URL}/clear-memory`, {
+        method: 'POST'
+      });
+      setMemory({
+        quest: '',
+        knownCharacters: [],
+        knownItems: [],
+        knownLocations: [],
+        knownLaws: []
+      });
       setHighlights([]);
     } catch (err) {
       console.error('Failed to clear memory:', err);
@@ -56,22 +64,16 @@ function App() {
       const ability = match[2].charAt(0).toUpperCase() + match[2].slice(1).toLowerCase();
       const dc = match[3] ? parseInt(match[3]) : null;
       const sentenceMatch = text.match(/.*?make.*?check.*?[.?!]/i);
-      setLastRollContext(sentenceMatch ? sentenceMatch[0] : '');
+      if (sentenceMatch) {
+        setLastRollContext(sentenceMatch[0]);
+      } else {
+        setLastRollContext('');
+      }
       setRollPrompt({ ability, dc });
     } else {
       setRollPrompt(null);
       setLastRollContext('');
     }
-  };
-
-  const highlightText = (text, highlights) => {
-    let result = text;
-    highlights.forEach(({ text: phrase, type }) => {
-      const escaped = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`\\b${escaped}\\b`, 'gi');
-      result = result.replace(regex, `<mark class="${type}">${phrase}</mark>`);
-    });
-    return result;
   };
 
   const extractMemory = async (text) => {
@@ -82,7 +84,9 @@ function App() {
         body: JSON.stringify({ text })
       });
       const extracted = await res.json();
+      console.log('📌 Received highlights from backend:', extracted.highlights);
       const safe = (val) => Array.isArray(val) ? val : [];
+
       setMemory(prev => ({
         quest: extracted.quest || prev.quest,
         knownCharacters: Array.from(new Set([...prev.knownCharacters, ...safe(extracted.knownCharacters)])),
@@ -90,6 +94,7 @@ function App() {
         knownLocations: Array.from(new Set([...prev.knownLocations, ...safe(extracted.knownLocations)])),
         knownLaws: Array.from(new Set([...prev.knownLaws, ...safe(extracted.knownLaws)]))
       }));
+
       setHighlights(safe(extracted.highlights));
     } catch (err) {
       console.error('Memory extraction failed:', err);
@@ -101,6 +106,7 @@ function App() {
     if (playerName.trim()) {
       setSubmitted(true);
       character.name = playerName;
+
       try {
         const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
           method: 'POST',
@@ -123,13 +129,14 @@ function App() {
   const sendMessage = async (msg = input) => {
     if (!msg.trim()) return;
     const playerMessage = { sender: 'player', text: msg };
-    setMessages(prev => [...prev, playerMessage]);
+    setMessages((prev) => [...prev, playerMessage]);
     setInput('');
     setOptions([]);
     setRollPrompt(null);
     setQuestionMode(false);
     setLastPlayerQuestion(msg);
     setLoading(true);
+
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
         method: 'POST',
@@ -138,14 +145,15 @@ function App() {
       });
       const data = await res.json();
       const aiMessage = { sender: 'ai', text: data.response };
-      setMessages(prev => [...prev, aiMessage]);
+      setMessages((prev) => [...prev, aiMessage]);
       setOptions(data.options || []);
       detectRollRequest(data.response);
       extractMemory(data.response);
     } catch (error) {
       console.error('Error:', error);
-      setMessages(prev => [...prev, { sender: 'ai', text: '⚠️ Something went wrong talking to the Dungeon Master.' }]);
+      setMessages((prev) => [...prev, { sender: 'ai', text: '⚠️ Something went wrong talking to the Dungeon Master.' }]);
     }
+
     setLoading(false);
   };
 
@@ -167,7 +175,7 @@ function App() {
     const total = roll + mod;
     const rollResult = `🎲 ${rollPrompt.ability} check${rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ''}: Rolled ${roll} + ${mod} = ${total}`;
     const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.\nThis was in response to my question: "${lastPlayerQuestion}" and the DM's prompt: "${lastRollContext}"`;
-    setMessages(prev => [...prev, { sender: 'player', text: rollResult }]);
+    setMessages((prev) => [...prev, { sender: 'player', text: rollResult }]);
     sendMessage(playerMsg);
     setRollPrompt(null);
     setLastRollContext('');
@@ -191,32 +199,59 @@ function App() {
               <p><strong>Level:</strong> {character.level}</p>
               <p><strong>HP:</strong> {character.hp}</p>
               <h3>Stats</h3>
-              <ul>{Object.entries(character.stats).map(([stat, value]) => <li key={stat}>{stat}: {value}</li>)}</ul>
+              <ul>
+                {Object.entries(character.stats).map(([stat, value]) => (
+                  <li key={stat}>{stat}: {value}</li>
+                ))}
+              </ul>
               <h3>Inventory</h3>
-              <ul>{character.inventory.map((item, i) => <li key={i}>{item}</li>)}</ul>
+              <ul>
+                {character.inventory.map((item, i) => <li key={i}>{item}</li>)}
+              </ul>
             </div>
+
             <div className="game-area">
               <div className="chat-box">
                 {messages.map((msg, i) => (
                   <div key={i} className={msg.sender}>
-                    <strong>{msg.sender === 'ai' ? 'DM' : playerName}:</strong> <span dangerouslySetInnerHTML={{ __html: highlightText(msg.text, highlights) }} />
+                    <strong>{msg.sender === 'ai' ? 'DM' : playerName}:</strong> {msg.text}
                   </div>
                 ))}
                 {loading && <div className="ai">DM is thinking...</div>}
               </div>
+
+              {highlights.length > 0 && (
+                <div className="highlight-box">
+                  <h2>🧠 New Highlights</h2>
+                  <ul>
+                    {highlights.map((h, i) => (
+                      <li key={i}><strong>{h.type}:</strong> {h.text}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {rollPrompt && (
                 <div className="roll-section">
-                  {lastRollContext && <p className="roll-context">🧠 Rolling for: <em>{lastRollContext}</em></p>}
+                  {lastRollContext && (
+                    <p className="roll-context">
+                      🧠 Rolling for: <em>{lastRollContext}</em>
+                    </p>
+                  )}
                   <button onClick={handleRollCheck}>
                     🎲 Roll {rollPrompt.ability} Check{rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ''}
                   </button>
                 </div>
               )}
+
               <div className="options">
-                {options.map((option, i) => <button key={i} onClick={() => handleOptionClick(option)}>{option}</button>)}
+                {options.map((option, i) => (
+                  <button key={i} onClick={() => handleOptionClick(option)}>{option}</button>
+                ))}
                 <button onClick={() => setQuestionMode(true)}>❓ Ask a question</button>
                 <button onClick={clearMemory}>🧼 Clear Memory</button>
               </div>
+
               {questionMode && (
                 <form onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}>
                   <input type="text" placeholder="Ask the DM a question..." value={input} onChange={(e) => setInput(e.target.value)} />
@@ -224,13 +259,18 @@ function App() {
                 </form>
               )}
             </div>
+
             <div className="memory-sidebar">
               <h2>📖 World Memory</h2>
-              <p><strong>🎯 Quest:</strong> {memory.quest || 'None yet'}</p>
-              <p><strong>🎒 Items:</strong> {memory.knownItems.join(', ') || 'None'}</p>
-              <p><strong>🧑‍🤝‍🧑 Characters:</strong> {memory.knownCharacters.join(', ') || 'None'}</p>
-              <p><strong>🗺 Locations:</strong> {memory.knownLocations.join(', ') || 'None'}</p>
-              <p><strong>📜 Laws:</strong> {memory.knownLaws.join(', ') || 'None'}</p>
+              {memory && (
+                <div>
+                  <p><strong>🎯 Quest:</strong> {memory.quest || 'None yet'}</p>
+                  <p><strong>🎒 Items:</strong> {memory.knownItems.join(', ') || 'None'}</p>
+                  <p><strong>🧑‍🤝‍🧑 Characters:</strong> {memory.knownCharacters.join(', ') || 'None'}</p>
+                  <p><strong>🗺 Locations:</strong> {memory.knownLocations.join(', ') || 'None'}</p>
+                  <p><strong>📜 Laws:</strong> {memory.knownLaws.join(', ') || 'None'}</p>
+                </div>
+              )}
             </div>
           </div>
         )}
