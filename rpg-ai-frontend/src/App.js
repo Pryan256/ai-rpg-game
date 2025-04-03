@@ -142,7 +142,7 @@ function App() {
     if (playerName.trim()) {
       setSubmitted(true);
       character.name = playerName;
-
+  
       try {
         const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
           method: 'POST',
@@ -150,15 +150,23 @@ function App() {
           body: JSON.stringify({ name: playerName, message: 'start' })
         });
         const data = await res.json();
-        detectRollRequest(data.response);
-        extractMemory(data.response);
-        await streamMessage(data.response);
+  
+        const [storyPart, choicePart] = data.response.split(/Choices:/i);
+        const choices = choicePart
+          ? choicePart.trim().split(/\n|-/).map(line => line.trim()).filter(line => line.length > 0)
+          : [];
+  
+        detectRollRequest(storyPart);
+        extractMemory(storyPart);
+        setOptions(choices);
+        await streamMessage(storyPart);
       } catch (error) {
         console.error('Error:', error);
         setMessages([{ sender: 'ai', text: '⚠️ Something went wrong getting your greeting.' }]);
       }
     }
   };
+  
 
   const sendMessage = async (msg = input) => {
     if (!msg.trim()) return;
@@ -170,7 +178,7 @@ function App() {
     setQuestionMode(false);
     setLastPlayerQuestion(msg);
     setLoading(true);
-
+  
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
         method: 'POST',
@@ -178,16 +186,24 @@ function App() {
         body: JSON.stringify({ name: playerName, message: msg })
       });
       const data = await res.json();
-      detectRollRequest(data.response);
-      extractMemory(data.response);
-      await streamMessage(data.response);
+  
+      const [storyPart, choicePart] = data.response.split(/Choices:/i);
+      const choices = choicePart
+        ? choicePart.trim().split(/\n|-/).map(line => line.trim()).filter(line => line.length > 0)
+        : [];
+  
+      detectRollRequest(storyPart);
+      extractMemory(storyPart);
+      setOptions(choices);
+      await streamMessage(storyPart);
     } catch (error) {
       console.error('Error:', error);
       setMessages((prev) => [...prev, { sender: 'ai', text: '⚠️ Something went wrong talking to the Dungeon Master.' }]);
     }
-
+  
     setLoading(false);
   };
+  
 
   const handleOptionClick = (option) => {
     setInput(option);
