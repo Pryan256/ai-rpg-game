@@ -20,12 +20,16 @@ const character = {
 
 const parseResponse = (response) => {
   const [storyPart, choicePart] = response.split(/Choices:/i);
+
+  // fallback: if dash bullets are not used, split by lines starting with a dash
   const rawChoices = choicePart
     ? choicePart
-        .split('\n')
-        .map(line => line.replace(/^[-\u2022*]\s*/, '').trim())
-        .filter(line => line.length > 0)
+        .split(/\n|\r/) // split by line
+        .map(line => line.trim())
+        .filter(line => line.length > 0 && (/^[-\u2022*]/.test(line) || /^[A-Z]/.test(line)))
+        .map(line => line.replace(/^[-\u2022*]\s*/, ''))
     : [];
+
   console.log('📜 Story:', storyPart);
   console.log('🧠 Raw Choices:', choicePart);
   console.log('✅ Parsed choices:', rawChoices);
