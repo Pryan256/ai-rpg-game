@@ -82,7 +82,7 @@ function App() {
     highlights.forEach(({ text: phrase, type }) => {
       if (!phrase || typeof phrase !== 'string') return;
       const regex = new RegExp(`\\b(${phrase.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')})\\b`, 'gi');
-      highlighted = highlighted.replace(regex, `<mark class="${type}">$1</mark>`);
+      highlighted = highlighted.replace(regex, `<span class="highlight-${type}">$1</span>`);
     });
     return highlighted;
   };
