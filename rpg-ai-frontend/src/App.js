@@ -18,6 +18,20 @@ const character = {
   inventory: ['Spellbook', 'Staff', 'Potion of Healing']
 };
 
+const parseResponse = (response) => {
+  const [storyPart, choicePart] = response.split(/Choices:/i);
+  const rawChoices = choicePart
+    ? choicePart
+        .split('\n')
+        .map(line => line.replace(/^[-\u2022*]\s*/, '').trim())
+        .filter(line => line.length > 0)
+    : [];
+  console.log('📜 Story:', storyPart);
+  console.log('🧠 Raw Choices:', choicePart);
+  console.log('✅ Parsed choices:', rawChoices);
+  return { storyPart: storyPart.trim(), choices: rawChoices };
+};
+
 function App() {
   const [playerName, setPlayerName] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -125,10 +139,8 @@ function App() {
         body: JSON.stringify({ name: playerName, message: 'start' })
       });
       const data = await res.json();
-      const [storyPart, choicePart] = data.response.split(/Choices:/i);
-      const choices = choicePart?.trim().split(/\n|-/).map(l => l.trim()).filter(Boolean) || [];
-      console.log('Parsed choices:', choices); // ✅ Debug log
-      setOptions(choices); // ✅ Set before streaming
+      const { storyPart, choices } = parseResponse(data.response);
+      setOptions(choices);
       detectRollRequest(storyPart);
       extractMemory(storyPart);
       await streamMessage(storyPart);
@@ -152,10 +164,8 @@ function App() {
         body: JSON.stringify({ name: playerName, message: msg })
       });
       const data = await res.json();
-      const [storyPart, choicePart] = data.response.split(/Choices:/i);
-      const choices = choicePart?.trim().split(/\n|-/).map(l => l.trim()).filter(Boolean) || [];
-      console.log('Parsed choices:', choices); // ✅ Debug log
-      setOptions(choices); // ✅ Set before streaming
+      const { storyPart, choices } = parseResponse(data.response);
+      setOptions(choices);
       detectRollRequest(storyPart);
       extractMemory(storyPart);
       await streamMessage(storyPart);
