@@ -181,12 +181,15 @@ Return them as JSON like:
 
     let parsed;
     try {
-      parsed = JSON.parse(extractResponse.choices[0].message.content);
+      const raw = extractResponse.choices[0].message.content;
+      const cleaned = raw.replace(/^```json\s*|\s*```$/g, '');
+      parsed = JSON.parse(cleaned);
       console.log('📌 Extracted memory highlights:', parsed.highlights);
     } catch (parseErr) {
       console.error('❌ Failed to parse OpenAI response:', extractResponse.choices[0].message.content);
       return res.status(500).json({ error: 'Failed to parse memory JSON' });
     }
+
 
     console.log('📌 Extracted memory highlights:', parsed.highlights);
 
