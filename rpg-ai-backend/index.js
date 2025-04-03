@@ -116,6 +116,29 @@ Choices:
   }
 });
 
+const fs = require('fs');
+const memoryPath = './memory.json'; // Make sure this path matches where your memory file is
+
+app.post('/clear-memory', (req, res) => {
+  const emptyMemory = {
+    quest: '',
+    knownItems: [],
+    knownCharacters: [],
+    knownLocations: [],
+    knownLaws: []
+  };
+
+  fs.writeFile(memoryPath, JSON.stringify(emptyMemory, null, 2), (err) => {
+    if (err) {
+      console.error('❌ Failed to clear memory:', err);
+      return res.status(500).json({ success: false });
+    }
+    console.log('🧠 Memory cleared.');
+    res.json({ success: true });
+  });
+});
+
+
 app.get('/', (req, res) => {
   res.send('RPG AI backend is running!');
 });
