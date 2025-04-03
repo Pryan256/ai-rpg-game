@@ -95,7 +95,6 @@ function App() {
         body: JSON.stringify({ text })
       });
       const extracted = await res.json();
-      console.log('📌 Received highlights from backend:', extracted.highlights);
       const safe = (val) => Array.isArray(val) ? val : [];
 
       setMemory(prev => ({
@@ -112,6 +111,25 @@ function App() {
     }
   };
 
+  const streamMessage = async (text) => {
+    const words = text.split(' ');
+    let current = '';
+    for (let i = 0; i < words.length; i++) {
+      current += words[i] + ' ';
+      setMessages((prev) => {
+        const newMessages = [...prev];
+        const last = newMessages[newMessages.length - 1];
+        if (last?.sender === 'ai') {
+          newMessages[newMessages.length - 1] = { ...last, text: current };
+        } else {
+          newMessages.push({ sender: 'ai', text: current });
+        }
+        return newMessages;
+      });
+      await new Promise((r) => setTimeout(r, 40));
+    }
+  };
+
   const handleNameSubmit = async (e) => {
     e.preventDefault();
     if (playerName.trim()) {
@@ -125,11 +143,9 @@ function App() {
           body: JSON.stringify({ name: playerName, message: 'start' })
         });
         const data = await res.json();
-        const aiMessage = { sender: 'ai', text: data.response };
-        setMessages([aiMessage]);
-        setOptions(data.options || []);
         detectRollRequest(data.response);
         extractMemory(data.response);
+        await streamMessage(data.response);
       } catch (error) {
         console.error('Error:', error);
         setMessages([{ sender: 'ai', text: '⚠️ Something went wrong getting your greeting.' }]);
@@ -155,11 +171,9 @@ function App() {
         body: JSON.stringify({ name: playerName, message: msg })
       });
       const data = await res.json();
-      const aiMessage = { sender: 'ai', text: data.response };
-      setMessages((prev) => [...prev, aiMessage]);
-      setOptions(data.options || []);
       detectRollRequest(data.response);
       extractMemory(data.response);
+      await streamMessage(data.response);
     } catch (error) {
       console.error('Error:', error);
       setMessages((prev) => [...prev, { sender: 'ai', text: '⚠️ Something went wrong talking to the Dungeon Master.' }]);
@@ -232,7 +246,12 @@ function App() {
                   />
                 </div>
               ))}
-              {loading && <div className="ai">DM is thinking...</div>}
+              {loading && (
+                <div className="dm-thinking">
+                  🔮 The DM is weaving your fate...
+                  <span className="dots"><span>.</span><span>.</span><span>.</span></span>
+                </div>
+              )}
             </div>
 
             {rollPrompt && (

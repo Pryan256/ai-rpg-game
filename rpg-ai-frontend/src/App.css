@@ -151,25 +151,25 @@ button:hover {
 .highlight-character {
   background-color: rgba(255, 165, 0, 0.3);
   color: rgba(50, 32, 0, 1);
-  border-radius: 10px;
+  border-radius: 100px;
   padding:4px;
 }
 .highlight-location {
   background-color: rgba(100, 149, 237, 0.3);
   color: rgb(16, 36, 71);
-  border-radius: 10px;
+  border-radius: 100px;
   padding:4px;
 }
 .highlight-item {
   background-color: rgba(60, 179, 113, 0.3);
   color: rgb(13, 60, 34);
-  border-radius: 10px;
+  border-radius: 100px;
   padding:4px;
 }
 .highlight-law {
   background-color: rgba(221, 160, 221, 0.3);
   color: rgb(41, 21, 41);
-  border-radius: 10px;
+  border-radius: 100px;
   padding:4px;
 }
 
@@ -184,3 +184,33 @@ button:hover {
     width: 100%;
   }
 }
+
+.dm-thinking {
+  font-style: italic;
+  color: #6b4b2d;
+  font-size: 1.05rem;
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.dots span {
+  animation: blink 1.5s infinite;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.dots span:nth-child(2) {
+  animation-delay: 0.3s;
+}
+.dots span:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes blink {
+  0% { opacity: 0.2; }
+  20% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
