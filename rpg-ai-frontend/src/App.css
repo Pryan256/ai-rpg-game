@@ -1,47 +1,120 @@
-/* ========== Global Layout ========== */
+/* Global Reset */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* Base App Styling */
 .App {
   font-family: 'Georgia', serif;
   background-color: #fef8f1;
   min-height: 100vh;
-  margin: 0;
-  padding: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  box-sizing: border-box;
+  text-align: center;
 }
 
-/* ========== Header ========== */
 h1 {
   color: #6b4b2d;
-  text-align: center;
-  padding: 2rem 1rem 0;
-  font-size: 2rem;
+  margin-bottom: 2rem;
 }
 
-/* ========== Grid Layout ========== */
+/* Layout Grid */
 .main-grid {
+  flex: 1;
   display: grid;
   grid-template-columns: 250px 1fr 250px;
   gap: 2rem;
   max-width: 1600px;
   margin: 0 auto;
-  padding: 2rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Responsive layout for smaller screens */
 @media (max-width: 1024px) {
   .main-grid {
     grid-template-columns: 1fr;
+    gap: 1rem;
     padding: 1rem;
   }
 
   .column {
     width: 100%;
   }
+
+  .options {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
 }
 
-/* ========== Character Sheet ========== */
+/* Chatbox */
+.chat-box {
+  background: #fff;
+  border: 1px solid #ddd;
+  padding: 1rem;
+  height: 400px;
+  overflow-y: auto;
+  text-align: left;
+  margin-bottom: 1rem;
+}
+
+.ai {
+  color: #6b4b2d;
+}
+
+.player {
+  color: #003049;
+}
+
+/* Input + Form */
+input {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  background: #6b4b2d;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  margin: 0.25rem;
+}
+
+button:hover {
+  background: #593a21;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Character Sheet */
 .character-sheet {
   padding: 1rem;
   border: 2px solid #d6bfa7;
-  background-color: #fffaf4;
   border-radius: 12px;
+  background-color: #fffaf4;
   font-size: 0.9rem;
   text-align: left;
 }
@@ -61,40 +134,34 @@ h1 {
   margin-bottom: 0.25rem;
 }
 
-/* ========== Game Area ========== */
+/* Game Area */
 .game-area {
   flex: 1;
 }
 
-.chat-box {
-  background: #fff;
-  border: 1px solid #ddd;
-  padding: 1rem;
-  min-height: 300px;
-  max-height: 500px;
-  overflow-y: auto;
+/* Roll Section */
+.roll-section {
+  margin: 1rem 0;
   text-align: left;
-  margin-bottom: 1rem;
-  border-radius: 6px;
 }
 
-.ai {
-  color: #6b4b2d;
+.roll-context {
+  margin-bottom: 0.5rem;
+  font-style: italic;
+  color: #555;
 }
 
-.player {
-  color: #003049;
-}
-
-/* ========== Memory Sidebar ========== */
+/* Memory Sidebar */
 .memory-sidebar {
   padding: 1rem;
   border: 2px solid #d6bfa7;
   background-color: #fffaf4;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   font-size: 0.9rem;
   text-align: left;
+  max-height: 600px;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .memory-sidebar h2 {
@@ -108,63 +175,20 @@ h1 {
   line-height: 1.4;
 }
 
-/* ========== Form and Input ========== */
-input {
-  width: 100%;
-  padding: 0.5rem;
-  font-size: 1rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-/* ========== Buttons ========== */
-button {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  background: #6b4b2d;
-  color: white;
-  border: none;
-  border-radius: 999px;
-  cursor: pointer;
-  margin: 0.3rem;
-  transition: background 0.2s;
-}
-
-button:hover {
-  background: #593a21;
-}
-
-.options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
-  margin-top: 1rem;
-}
-
-/* ========== Rolls ========== */
-.roll-section {
-  margin: 1rem 0;
-  text-align: left;
-}
-
-.roll-context {
-  margin-bottom: 0.5rem;
-  font-style: italic;
-  color: #555;
-}
-
-/* ========== Highlighted Text ========== */
+/* Highlighting */
 .highlight-character {
   background-color: rgba(255, 165, 0, 0.3);
+  color: rgba(50, 32, 0, 1);
 }
 .highlight-location {
   background-color: rgba(100, 149, 237, 0.3);
+  color: rgb(16, 36, 71);
 }
 .highlight-item {
   background-color: rgba(60, 179, 113, 0.3);
+  color: rgb(13, 60, 34);
 }
 .highlight-law {
   background-color: rgba(221, 160, 221, 0.3);
+  color: rgb(41, 21, 41);
 }
