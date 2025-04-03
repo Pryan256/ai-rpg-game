@@ -18,7 +18,8 @@ let memory = {
   knownItems: [],
   knownCharacters: [],
   knownLocations: [],
-  knownLaws: []
+  knownLaws: [],
+  highlights: []
 };
 
 app.use(cors({
@@ -125,7 +126,8 @@ app.post('/clear-memory', (req, res) => {
     knownItems: [],
     knownCharacters: [],
     knownLocations: [],
-    knownLaws: []
+    knownLaws: [],
+    highlights: []
   };
   fs.writeFile(memoryPath, JSON.stringify(memory, null, 2), (err) => {
     if (err) {
@@ -178,6 +180,8 @@ Return them as JSON like:
     });
 
     const parsed = JSON.parse(extractResponse.choices[0].message.content);
+    console.log('📌 Extracted memory highlights:', parsed.highlights);
+
 
     // Update in-memory store
     const safe = (arr) => Array.isArray(arr) ? arr : [];
@@ -186,6 +190,7 @@ Return them as JSON like:
     memory.knownItems = Array.from(new Set([...memory.knownItems, ...safe(parsed.knownItems)]));
     memory.knownLocations = Array.from(new Set([...memory.knownLocations, ...safe(parsed.knownLocations)]));
     memory.knownLaws = Array.from(new Set([...memory.knownLaws, ...safe(parsed.knownLaws)]));
+    memory.highlights = safe(parsed.highlights);
 
     res.json(parsed);
   } catch (err) {
