@@ -24,7 +24,6 @@ function App() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [options, setOptions] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [rollPrompt, setRollPrompt] = useState(null);
   const [questionMode, setQuestionMode] = useState(false);
   const [lastRollContext, setLastRollContext] = useState('');
@@ -99,28 +98,20 @@ function App() {
 
   const streamMessage = async (text) => {
     const words = text.split(' ');
-    let accumulated = '';
     let currentText = '';
-  
-    setMessages(prev => [...prev, { sender: 'ai', text: '' }]);
-  
+    setMessages((prev) => [...prev, { sender: 'ai', text: '' }]);
+
     for (const word of words) {
       currentText += word + ' ';
-      setMessages(prev => {
-        const newMessages = [...prev];
-        const last = newMessages[newMessages.length - 1];
-        if (last?.sender === 'ai') {
-          newMessages[newMessages.length - 1] = {
-            ...last,
-            text: currentText
-          };
-        }
-        return newMessages;
+      setMessages((prev) => {
+        const updated = [...prev];
+        const last = updated[updated.length - 1];
+        if (last.sender === 'ai') last.text = currentText;
+        return updated;
       });
-      await new Promise(resolve => setTimeout(resolve, 40));
+      await new Promise((r) => setTimeout(r, 40));
     }
   };
-  
 
   const handleNameSubmit = async (e) => {
     e.preventDefault();
