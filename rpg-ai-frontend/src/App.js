@@ -100,7 +100,7 @@ function App() {
     const words = text.split(' ');
     let accumulated = '';
     setMessages((prev) => [...prev, { sender: 'ai', text: '' }]);
-  
+
     words.forEach((word, index) => {
       setTimeout(() => {
         accumulated += word + ' ';
@@ -110,10 +110,9 @@ function App() {
           if (last.sender === 'ai') last.text = accumulated;
           return updated;
         });
-      }, index * 40); // simulate stream delay
+      }, index * 40);
     });
   };
-  
 
   const handleNameSubmit = async (e) => {
     e.preventDefault();
@@ -128,9 +127,10 @@ function App() {
       const data = await res.json();
       const [storyPart, choicePart] = data.response.split(/Choices:/i);
       const choices = choicePart?.trim().split(/\n|-/).map(l => l.trim()).filter(Boolean) || [];
+      console.log('Parsed choices:', choices); // ✅ Debug log
+      setOptions(choices); // ✅ Set before streaming
       detectRollRequest(storyPart);
       extractMemory(storyPart);
-      setOptions(choices);
       await streamMessage(storyPart);
     } catch (err) {
       console.error('Error:', err);
@@ -154,9 +154,10 @@ function App() {
       const data = await res.json();
       const [storyPart, choicePart] = data.response.split(/Choices:/i);
       const choices = choicePart?.trim().split(/\n|-/).map(l => l.trim()).filter(Boolean) || [];
+      console.log('Parsed choices:', choices); // ✅ Debug log
+      setOptions(choices); // ✅ Set before streaming
       detectRollRequest(storyPart);
       extractMemory(storyPart);
-      setOptions(choices);
       await streamMessage(storyPart);
     } catch (err) {
       console.error('Error:', err);
