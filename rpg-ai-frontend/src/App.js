@@ -28,6 +28,8 @@ function App() {
   const [rollPrompt, setRollPrompt] = useState(null);
   const [questionMode, setQuestionMode] = useState(false);
   const [lastRollContext, setLastRollContext] = useState('');
+  const [lastPlayerQuestion, setLastPlayerQuestion] = useState('');
+
 
 
   const statModifier = (statScore) => Math.floor((statScore - 10) / 2);
@@ -82,7 +84,7 @@ function App() {
 
   const sendMessage = async (msg = input) => {
     if (!msg.trim()) return;
-
+  
     const playerMessage = { sender: 'player', text: msg };
     setMessages((prev) => [...prev, playerMessage]);
     setInput('');
@@ -90,15 +92,16 @@ function App() {
     setRollPrompt(null);
     setQuestionMode(false);
     setLoading(true);
-
+  
+    setLastPlayerQuestion(msg); // ✅ Save the last thing the player asked
+  
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: playerName, message: msg }), // or 'start' for the first call
+        body: JSON.stringify({ name: playerName, message: msg }),
       });
-      
-
+  
       const data = await res.json();
       const aiMessage = { sender: 'ai', text: data.response };
       setMessages((prev) => [...prev, aiMessage]);
@@ -108,9 +111,10 @@ function App() {
       console.error('Error:', error);
       setMessages((prev) => [...prev, { sender: 'ai', text: '⚠️ Something went wrong talking to the Dungeon Master.' }]);
     }
-
+  
     setLoading(false);
   };
+  
 
   const handleOptionClick = (option) => {
     setInput(option);
