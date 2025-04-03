@@ -1,20 +1,9 @@
-/* Global Reset */
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-}
-
-/* Base App Styling */
 .App {
   font-family: 'Georgia', serif;
+  text-align: center;
   background-color: #fef8f1;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
   padding: 2rem;
-  box-sizing: border-box;
-  text-align: center;
 }
 
 h1 {
@@ -22,99 +11,22 @@ h1 {
   margin-bottom: 2rem;
 }
 
-/* Layout Grid */
+/* Layout structure */
 .main-grid {
-  flex: 1;
   display: grid;
-  grid-template-columns: 250px 1fr 250px;
+  grid-template-columns: 260px 1fr 260px;
   gap: 2rem;
-  max-width: 1600px;
+  max-width: 1440px;
   margin: 0 auto;
-  width: 100%;
-  box-sizing: border-box;
+  align-items: flex-start;
 }
 
-.column {
-  display: flex;
-  flex-direction: column;
-}
-
-/* Responsive layout for smaller screens */
-@media (max-width: 1024px) {
-  .main-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-    padding: 1rem;
-  }
-
-  .column {
-    width: 100%;
-  }
-
-  .options {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-  }
-}
-
-/* Chatbox */
-.chat-box {
-  background: #fff;
-  border: 1px solid #ddd;
-  padding: 1rem;
-  height: 400px;
-  overflow-y: auto;
-  text-align: left;
-  margin-bottom: 1rem;
-}
-
-.ai {
-  color: #6b4b2d;
-}
-
-.player {
-  color: #003049;
-}
-
-/* Input + Form */
-input {
-  width: 100%;
-  padding: 0.5rem;
-  font-size: 1rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-button {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  background: #6b4b2d;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  margin: 0.25rem;
-}
-
-button:hover {
-  background: #593a21;
-}
-
-.options {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-/* Character Sheet */
+/* Character Panel */
 .character-sheet {
-  padding: 1rem;
-  border: 2px solid #d6bfa7;
-  border-radius: 12px;
   background-color: #fffaf4;
+  border: 2px solid #d6bfa7;
+  padding: 1.5rem;
+  border-radius: 12px;
   font-size: 0.9rem;
   text-align: left;
 }
@@ -134,34 +46,50 @@ button:hover {
   margin-bottom: 0.25rem;
 }
 
-/* Game Area */
+/* Game (chat) area */
 .game-area {
   flex: 1;
+  width: 100%;
 }
 
-/* Roll Section */
-.roll-section {
-  margin: 1rem 0;
+/* Emphasized chat-box styling */
+.chat-box {
+  background: #fffef9;
+  border: 2px solid #e3d6c1;
+  border-radius: 8px;
+  padding: 1.25rem;
+  height: 500px;
+  overflow-y: auto;
   text-align: left;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  font-size: 1.05rem;
+  line-height: 1.6;
 }
 
-.roll-context {
-  margin-bottom: 0.5rem;
-  font-style: italic;
-  color: #555;
+.chat-box .ai,
+.chat-box .player {
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.chat-box strong {
+  font-weight: bold;
+  color: #6b4b2d;
+  display: inline-block;
+  margin-bottom: 0.25rem;
 }
 
 /* Memory Sidebar */
 .memory-sidebar {
+  width: 100%;
   padding: 1rem;
   border: 2px solid #d6bfa7;
   background-color: #fffaf4;
   border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   font-size: 0.9rem;
   text-align: left;
-  max-height: 600px;
-  overflow-y: auto;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .memory-sidebar h2 {
@@ -173,6 +101,50 @@ button:hover {
 .memory-sidebar p {
   margin: 0.5rem 0;
   line-height: 1.4;
+}
+
+/* Inputs and Buttons */
+input {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  background: #6b4b2d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 0.5rem;
+}
+
+button:hover {
+  background: #593a21;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-start;
+}
+
+/* Ask form and roll */
+.roll-section {
+  margin: 1rem 0;
+  text-align: left;
+}
+
+.roll-context {
+  margin-bottom: 0.5rem;
+  font-style: italic;
+  color: #555;
 }
 
 /* Highlighting */
@@ -199,4 +171,16 @@ button:hover {
   color: rgb(41, 21, 41);
   border-radius: 10px;
   padding:4px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 900px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .character-sheet,
+  .memory-sidebar {
+    width: 100%;
+  }
 }
