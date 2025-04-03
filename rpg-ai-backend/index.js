@@ -7,6 +7,16 @@ require('dotenv').config();
 const { OpenAI } = require('openai');
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// 🧠 In-memory context store
+let memory = {
+  playerName: '',
+  lastPlayerMessage: '',
+  lastDMPrompt: '',
+  quest: '',
+  knownItems: [],
+  knownCharacters: [],
+};
+
 // ✅ Allow Netlify origin
 app.use(cors({
   origin: 'https://dancing-dolphin-3d57e1.netlify.app',
@@ -15,6 +25,8 @@ app.use(express.json());
 
 app.post('/message', async (req, res) => {
   const { name, message } = req.body;
+  memory.playerName = name;
+  memory.lastPlayerMessage = message;
 
   // 🧙 Player's character sheet
   const playerState = {
@@ -46,6 +58,13 @@ The player is:
 - Stats: STR ${playerState.stats.STR}, DEX ${playerState.stats.DEX}, CON ${playerState.stats.CON}, INT ${playerState.stats.INT}, WIS ${playerState.stats.WIS}, CHA ${playerState.stats.CHA}
 - Inventory: ${playerState.inventory.join(', ')}
 
+🧠 Memory from previous exchanges:
+- Last player message: ${memory.lastPlayerMessage}
+- Last DM prompt: ${memory.lastDMPrompt || 'N/A'}
+- Current quest objective: ${memory.quest || 'Not yet established'}
+- Known items: ${memory.knownItems.join(', ') || 'None'}
+- Known characters: ${memory.knownCharacters.join(', ') || 'None'}
+
 🎭 DM Guidelines:
 - Only narrate the world, never describe the player taking action unless they explicitly say so.
 - If a player asks about something that might require a skill check (like identifying a plant or sensing danger), ask them to roll for it.
@@ -76,6 +95,7 @@ Choices:
     });
 
     const raw = chatResponse.choices[0].message.content;
+    memory.lastDMPrompt = raw;
 
     const [storyPart, choicePart] = raw.split(/Choices:/i);
     const choices = choicePart
