@@ -176,6 +176,18 @@ button:hover {
   line-height: 1.4;
 }
 
+mark.character {
+  background-color: rgba(255, 165, 0, 0.3);
+}
+mark.location {
+  background-color: rgba(100, 149, 237, 0.3);
+}
+mark.item {
+  background-color: rgba(60, 179, 113, 0.3);
+}
+mark.law {
+  background-color: rgba(221, 160, 221, 0.3);
+}
 
 
 
