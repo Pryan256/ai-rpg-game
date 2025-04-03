@@ -74,20 +74,25 @@ function App() {
     }
   };
 
-  const updateMemoryFromResponse = (text) => {
-    const newMemory = { ...memory };
+  const extractMemory = async (text) => {
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/extract-memory`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+      const extracted = await res.json();
 
-    const characterMatches = [...text.matchAll(/\b(?:I am|My name is) ([A-Z][a-z]+(?: [A-Z][a-z]+)?)/g)].map(m => m[1]);
-    const itemMatches = [...text.matchAll(/\b([A-Z][a-z]+(?: of [A-Z][a-z]+)*\b(?: Scroll| Amulet| Gem| Blade| Sword| Ring| Potion))/g)].map(m => m[1]);
-    const locationMatches = [...text.matchAll(/\b(?:village|forest|cave|tower|citadel|temple|keep|ruins|city|town) of ([A-Z][a-z]+)/gi)].map(m => m[1]);
-    const lawMatches = [...text.matchAll(/\b(?:forbidden|illegal|punishable|law of [A-Z][a-z]+)\b/gi)].map(m => m[0]);
-
-    newMemory.knownCharacters = [...new Set([...newMemory.knownCharacters, ...characterMatches])];
-    newMemory.knownItems = [...new Set([...newMemory.knownItems, ...itemMatches])];
-    newMemory.knownLocations = [...new Set([...newMemory.knownLocations, ...locationMatches])];
-    newMemory.knownLaws = [...new Set([...newMemory.knownLaws, ...lawMatches])];
-
-    setMemory(newMemory);
+      setMemory(prev => ({
+        quest: extracted.quest || prev.quest,
+        knownCharacters: Array.from(new Set([...prev.knownCharacters, ...extracted.knownCharacters])),
+        knownItems: Array.from(new Set([...prev.knownItems, ...extracted.knownItems])),
+        knownLocations: Array.from(new Set([...prev.knownLocations, ...extracted.knownLocations])),
+        knownLaws: Array.from(new Set([...prev.knownLaws, ...extracted.knownLaws]))
+      }));
+    } catch (err) {
+      console.error('Memory extraction failed:', err);
+    }
   };
 
   const handleNameSubmit = async (e) => {
@@ -106,8 +111,8 @@ function App() {
         const aiMessage = { sender: 'ai', text: data.response };
         setMessages([aiMessage]);
         setOptions(data.options || []);
-        updateMemoryFromResponse(data.response);
         detectRollRequest(data.response);
+        extractMemory(data.response);
       } catch (error) {
         console.error('Error:', error);
         setMessages([{ sender: 'ai', text: '⚠️ Something went wrong getting your greeting.' }]);
@@ -136,8 +141,8 @@ function App() {
       const aiMessage = { sender: 'ai', text: data.response };
       setMessages((prev) => [...prev, aiMessage]);
       setOptions(data.options || []);
-      updateMemoryFromResponse(data.response);
       detectRollRequest(data.response);
+      extractMemory(data.response);
     } catch (error) {
       console.error('Error:', error);
       setMessages((prev) => [...prev, { sender: 'ai', text: '⚠️ Something went wrong talking to the Dungeon Master.' }]);
