@@ -42,16 +42,8 @@ function App() {
 
   const clearMemory = async () => {
     try {
-      await fetch(`${process.env.REACT_APP_API_URL}/clear-memory`, {
-        method: 'POST'
-      });
-      setMemory({
-        quest: '',
-        knownCharacters: [],
-        knownItems: [],
-        knownLocations: [],
-        knownLaws: []
-      });
+      await fetch(`${process.env.REACT_APP_API_URL}/clear-memory`, { method: 'POST' });
+      setMemory({ quest: '', knownCharacters: [], knownItems: [], knownLocations: [], knownLaws: [] });
       setHighlights([]);
     } catch (err) {
       console.error('Failed to clear memory:', err);
@@ -64,11 +56,7 @@ function App() {
       const ability = match[2].charAt(0).toUpperCase() + match[2].slice(1).toLowerCase();
       const dc = match[3] ? parseInt(match[3]) : null;
       const sentenceMatch = text.match(/.*?make.*?check.*?[.?!]/i);
-      if (sentenceMatch) {
-        setLastRollContext(sentenceMatch[0]);
-      } else {
-        setLastRollContext('');
-      }
+      setLastRollContext(sentenceMatch ? sentenceMatch[0] : '');
       setRollPrompt({ ability, dc });
     } else {
       setRollPrompt(null);
@@ -96,7 +84,6 @@ function App() {
       });
       const extracted = await res.json();
       const safe = (val) => Array.isArray(val) ? val : [];
-
       setMemory(prev => ({
         quest: extracted.quest || prev.quest,
         knownCharacters: Array.from(new Set([...prev.knownCharacters, ...safe(extracted.knownCharacters)])),
@@ -104,7 +91,6 @@ function App() {
         knownLocations: Array.from(new Set([...prev.knownLocations, ...safe(extracted.knownLocations)])),
         knownLaws: Array.from(new Set([...prev.knownLaws, ...safe(extracted.knownLaws)]))
       }));
-
       setHighlights(safe(extracted.highlights));
     } catch (err) {
       console.error('Memory extraction failed:', err);
@@ -114,80 +100,67 @@ function App() {
   const streamMessage = async (text) => {
     const words = text.split(' ');
     let accumulated = '';
-
-    const newMessages = [...messages];
-    let last = newMessages[newMessages.length - 1];
-    if (last?.sender !== 'ai') {
-      newMessages.push({ sender: 'ai', text: '' });
-      last = newMessages[newMessages.length - 1];
-    }
-
+    setMessages((prev) => {
+      const newMessages = [...prev, { sender: 'ai', text: '' }];
+      return newMessages;
+    });
     for (const word of words) {
       accumulated += word + ' ';
-      last.text = accumulated;
-      setMessages([...newMessages]);
+      setMessages((prev) => {
+        const updated = [...prev];
+        const last = updated[updated.length - 1];
+        if (last.sender === 'ai') last.text = accumulated;
+        return updated;
+      });
       await new Promise((r) => setTimeout(r, 40));
     }
   };
 
   const handleNameSubmit = async (e) => {
     e.preventDefault();
-    if (playerName.trim()) {
-      setSubmitted(true);
-      character.name = playerName;
-
-      try {
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: playerName, message: 'start' })
-        });
-        const data = await res.json();
-        const [storyPart, choicePart] = data.response.split(/Choices:/i);
-        const choices = choicePart
-          ? choicePart.trim().split(/\n|-/).map(line => line.trim()).filter(line => line.length > 0)
-          : [];
-
-        detectRollRequest(storyPart);
-        extractMemory(storyPart);
-        setOptions(choices);
-        await streamMessage(storyPart);
-      } catch (error) {
-        console.error('Error:', error);
-        setMessages([{ sender: 'ai', text: '⚠️ Something went wrong getting your greeting.' }]);
-      }
+    if (!playerName.trim()) return;
+    setSubmitted(true);
+    character.name = playerName;
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: playerName, message: 'start' })
+      });
+      const data = await res.json();
+      const [storyPart, choicePart] = data.response.split(/Choices:/i);
+      const choices = choicePart?.trim().split(/\n|-/).map(l => l.trim()).filter(Boolean) || [];
+      detectRollRequest(storyPart);
+      extractMemory(storyPart);
+      setOptions(choices);
+      await streamMessage(storyPart);
+    } catch (err) {
+      console.error('Error:', err);
+      setMessages([{ sender: 'ai', text: '⚠️ Something went wrong getting your greeting.' }]);
     }
   };
 
   const sendMessage = async (msg = input) => {
     if (!msg.trim()) return;
-    const playerMessage = { sender: 'player', text: msg };
-    setMessages((prev) => [...prev, playerMessage]);
+    setMessages((prev) => [...prev, { sender: 'player', text: msg }]);
     setInput('');
     setOptions([]);
     setRollPrompt(null);
     setQuestionMode(false);
     setLastPlayerQuestion(msg);
-
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: playerName, message: msg })
       });
       const data = await res.json();
-
       const [storyPart, choicePart] = data.response.split(/Choices:/i);
-      const choices = choicePart
-        ? choicePart.trim().split(/\n|-/).map(line => line.trim()).filter(line => line.length > 0)
-        : [];
-
+      const choices = choicePart?.trim().split(/\n|-/).map(l => l.trim()).filter(Boolean) || [];
       detectRollRequest(storyPart);
       extractMemory(storyPart);
       setOptions(choices);
       await streamMessage(storyPart);
-    } catch (error) {
-      console.error('Error:', error);
+    } catch (err) {
+      console.error('Error:', err);
       setMessages((prev) => [...prev, { sender: 'ai', text: '⚠️ Something went wrong talking to the Dungeon Master.' }]);
     }
   };
