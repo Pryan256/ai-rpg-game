@@ -26,6 +26,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [options, setOptions] = useState([]);
   const [rollPrompt, setRollPrompt] = useState(null);
+  
   const [lastRollContext, setLastRollContext] = useState('');
   const [lastPlayerQuestion, setLastPlayerQuestion] = useState('');
   const [memory, setMemory] = useState({
@@ -166,7 +167,7 @@ function App() {
     setInput('');
     setOptions([]);
     setRollPrompt(null);
-    setQuestionMode(false);
+    
     setLastPlayerQuestion(msg);
     setLoadingDM(true);
 
