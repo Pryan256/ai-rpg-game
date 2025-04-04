@@ -37,8 +37,8 @@ function App() {
     knownLaws: []
   });
   const [highlights, setHighlights] = useState([]);
+  const [loadingDM, setLoadingDM] = useState(false);
 
-  // 🔐 Generate or retrieve session ID
   const [sessionId] = useState(() => {
     const stored = localStorage.getItem('sessionId');
     if (stored) return stored;
@@ -126,6 +126,7 @@ function App() {
         });
         if (index === words.length - 1) {
           onDone();
+          setLoadingDM(false);
         }
       }, index * 40);
     });
@@ -136,6 +137,7 @@ function App() {
     if (!playerName.trim()) return;
     setSubmitted(true);
     character.name = playerName;
+    setLoadingDM(true);
 
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
@@ -155,6 +157,7 @@ function App() {
     } catch (err) {
       console.error('Error:', err);
       setMessages([{ sender: 'ai', text: '⚠️ Something went wrong getting your greeting.' }]);
+      setLoadingDM(false);
     }
   };
 
@@ -166,6 +169,7 @@ function App() {
     setRollPrompt(null);
     setQuestionMode(false);
     setLastPlayerQuestion(msg);
+    setLoadingDM(true);
 
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
@@ -185,6 +189,7 @@ function App() {
     } catch (err) {
       console.error('Error:', err);
       setMessages((prev) => [...prev, { sender: 'ai', text: '⚠️ Something went wrong talking to the Dungeon Master.' }]);
+      setLoadingDM(false);
     }
   };
 
@@ -241,6 +246,15 @@ function App() {
           </div>
 
           <div className="column game-area">
+            {loadingDM && (
+              <div className="dm-thinking">
+                <span>🧙‍♂️ The Dungeon Master is thinking</span>
+                <span className="dots">
+                  <span>.</span><span>.</span><span>.</span>
+                </span>
+              </div>
+            )}
+
             <div className="chat-box">
               {messages.map((msg, i) => (
                 <div key={i} className={msg.sender}>
