@@ -8,27 +8,36 @@ require('dotenv').config();
 const { OpenAI } = require('openai');
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const memoryPath = './memory.json'; // for clearing memory if needed
-
-let memory = {
-  playerName: '',
-  lastPlayerMessage: '',
-  lastDMPrompt: '',
-  quest: '',
-  knownItems: [],
-  knownCharacters: [],
-  knownLocations: [],
-  knownLaws: [],
-  highlights: []
-};
+const sessions = {}; // 🧠 Stores memory per session
 
 app.use(cors({
-  origin: 'https://dancing-dolphin-3d57e1.netlify.app',
+  origin: 'https://dancing-dolphin-3d57e1.netlify.app', // Update as needed
 }));
 app.use(express.json());
 
+function getDefaultMemory() {
+  return {
+    playerName: '',
+    lastPlayerMessage: '',
+    lastDMPrompt: '',
+    quest: '',
+    knownItems: [],
+    knownCharacters: [],
+    knownLocations: [],
+    knownLaws: [],
+    highlights: []
+  };
+}
+
+// 💬 Handle player message
 app.post('/message', async (req, res) => {
-  const { name, message } = req.body;
+  const { name, message, sessionId } = req.body;
+  if (!sessionId) return res.status(400).json({ error: 'Missing sessionId' });
+
+  // 🧠 Initialize session if needed
+  if (!sessions[sessionId]) sessions[sessionId] = getDefaultMemory();
+  const memory = sessions[sessionId];
+
   memory.playerName = name;
   memory.lastPlayerMessage = message;
 
@@ -116,32 +125,26 @@ Choices:
   }
 });
 
-// 🧼 Clear memory
+// 🧼 Clear session memory
 app.post('/clear-memory', (req, res) => {
-  memory = {
-    playerName: '',
-    lastPlayerMessage: '',
-    lastDMPrompt: '',
-    quest: '',
-    knownItems: [],
-    knownCharacters: [],
-    knownLocations: [],
-    knownLaws: [],
-    highlights: []
-  };
-  fs.writeFile(memoryPath, JSON.stringify(memory, null, 2), (err) => {
-    if (err) {
-      console.error('❌ Failed to clear memory:', err);
-      return res.status(500).json({ success: false });
-    }
-    console.log('🧠 Memory cleared.');
-    res.json({ success: true });
-  });
+  const { sessionId } = req.body;
+  if (!sessionId || !sessions[sessionId]) {
+    return res.status(400).json({ success: false, error: 'Invalid session ID' });
+  }
+
+  sessions[sessionId] = getDefaultMemory();
+  console.log(`🧠 Memory cleared for session ${sessionId}`);
+  res.json({ success: true });
 });
 
-// 🔍 New: Extract memory using GPT
+// 🧠 Extract memory from DM story text
 app.post('/extract-memory', async (req, res) => {
-  const { text } = req.body;
+  const { text, sessionId } = req.body;
+  if (!sessionId || !sessions[sessionId]) {
+    return res.status(400).json({ error: 'Invalid session ID' });
+  }
+
+  const memory = sessions[sessionId];
 
   try {
     const extractResponse = await openai.chat.completions.create({
@@ -184,17 +187,11 @@ Return them as JSON like:
       const raw = extractResponse.choices[0].message.content;
       const cleaned = raw.replace(/^```json\s*|\s*```$/g, '');
       parsed = JSON.parse(cleaned);
-      console.log('📌 Extracted memory highlights:', parsed.highlights);
     } catch (parseErr) {
       console.error('❌ Failed to parse OpenAI response:', extractResponse.choices[0].message.content);
       return res.status(500).json({ error: 'Failed to parse memory JSON' });
     }
 
-
-    console.log('📌 Extracted memory highlights:', parsed.highlights);
-
-
-    // Update in-memory store
     const safe = (arr) => Array.isArray(arr) ? arr : [];
     memory.quest = parsed.quest || memory.quest;
     memory.knownCharacters = Array.from(new Set([...memory.knownCharacters, ...safe(parsed.knownCharacters)]));
