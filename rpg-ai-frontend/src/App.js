@@ -18,20 +18,6 @@ const character = {
   inventory: ['Spellbook', 'Staff', 'Potion of Healing']
 };
 
-const parseResponse = (response) => {
-  const [storyPart, choicePart] = response.split(/Choices:/i);
-  const rawChoices = choicePart
-    ? choicePart
-        .split('\n')
-        .map(line => line.replace(/^[-\u2022*]\s*/, '').trim())
-        .filter(line => line.length > 0)
-    : [];
-  console.log('📜 Story:', storyPart);
-  console.log('🧠 Raw Choices:', choicePart);
-  console.log('✅ Parsed choices:', rawChoices);
-  return { storyPart: storyPart.trim(), choices: rawChoices };
-};
-
 function App() {
   const [playerName, setPlayerName] = useState('');
   const [submitted, setSubmitted] = useState(false);
