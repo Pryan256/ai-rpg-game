@@ -11,8 +11,12 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const sessions = {}; // 🧠 Stores memory per session
 
 app.use(cors({
-  origin: 'https://dancing-dolphin-3d57e1.netlify.app', // Update as needed
+  origin: 'https://dancing-dolphin-3d57e1.netlify.app',
+  credentials: true,
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
 }));
+
 app.use(express.json());
 
 function getDefaultMemory() {
