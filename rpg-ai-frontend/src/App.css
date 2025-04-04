@@ -20,7 +20,7 @@ html, body, #root, .App {
 
 .main-grid {
   display: grid;
-  grid-template-columns: 260px 1fr 260px;
+  grid-template-columns: 260px minmax(0, 1fr) 260px;
   gap: 2rem;
   max-width: 1440px;
   margin: 0 auto;
@@ -52,13 +52,16 @@ html, body, #root, .App {
   margin-bottom: 0.25rem;
 }
 
-/* Game (chat) area */
 .game-area {
   display: flex;
   flex-direction: column;
   height: 100%;
   width: 100%;
+  max-width: 800px; /* 🧱 Set your preferred max width */
+  margin: 0 auto;   /* 🎯 Center horizontally */
+  box-sizing: border-box;
 }
+
 
 /* Emphasized chat-box styling */
 .chat-box {
@@ -225,16 +228,16 @@ button:hover {
 
 /* Scrollable horizontal options */
 .floating-input {
-  display: flex;
-  flex-direction: column;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  background-color: #fffef9;
   padding: 1rem 0 0;
   border-top: 2px solid #e3d6c1;
-  background-color: #fffef9;
   position: sticky;
   bottom: 0;
   z-index: 10;
-  width: 100%;
-  box-sizing: border-box;
 }
 
 .floating-input input[type="text"] {
@@ -249,14 +252,13 @@ button:hover {
 
 .options.horizontal {
   display: flex;
-  flex-wrap: nowrap;          /* No wrapping */
-  overflow-x: auto;           /* Scroll when overflow */
+  flex-wrap: nowrap;
+  overflow-x: auto;
   overflow-y: hidden;
-  width: 100%;                /* 💡 Force to match text input width */
-  max-width: 100%;
+  width: 100%;
   box-sizing: border-box;
-  padding-bottom: 0.5rem;
-  scrollbar-width: thin;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
 }
 
 .options.horizontal::-webkit-scrollbar {
@@ -266,17 +268,6 @@ button:hover {
 .options.horizontal::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 4px;
-}
-
-.options.horizontal button {
-  flex: 0 0 auto;
-  white-space: nowrap;
-}
-
-
-.options.horizontal button {
-  flex: 0 0 auto;
-  white-space: nowrap;
 }
 
 
