@@ -11,8 +11,15 @@ h1 {
   margin-bottom: 2rem;
 }
 
-/* Layout structure */
+/* Full-height layout */
+html, body, #root, .App {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 .main-grid {
+  min-height: calc(100vh - 4rem); /* account for h1 + padding */
   display: grid;
   grid-template-columns: 260px 1fr 260px;
   gap: 2rem;
@@ -214,16 +221,17 @@ button:hover {
   100% { opacity: 0.2; }
 }
 
+/* Scrollable horizontal options */
 .floating-input {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
   padding: 1rem 0 0;
   border-top: 2px solid #e3d6c1;
   background-color: #fffef9;
   position: sticky;
   bottom: 0;
   z-index: 10;
+  width: 100%;
 }
 
 .floating-input input[type="text"] {
@@ -238,10 +246,15 @@ button:hover {
 
 .options.horizontal {
   display: flex;
-  flex-wrap: nowrap;
   overflow-x: auto;
   gap: 0.5rem;
-  padding-bottom: 0.5rem;
+  padding: 0.5rem 0;
+  scrollbar-width: thin;
+}
+
+.options.horizontal button {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .options.horizontal button {
