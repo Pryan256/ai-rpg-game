@@ -136,24 +136,27 @@ function App() {
     if (!playerName.trim()) return;
     setSubmitted(true);
     character.name = playerName;
+  
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: playerName, message: 'start' })
       });
       const data = await res.json();
-      const { storyPart, choices } = parseResponse(data.response);
+      const storyPart = data.response;
+      const choices = data.options || [];
+  
       detectRollRequest(storyPart);
       extractMemory(storyPart);
       await streamMessage(storyPart, () => {
-        setOptions(choices);
+        setOptions(choices); // ✅ Buttons will now appear
       });
     } catch (err) {
       console.error('Error:', err);
       setMessages([{ sender: 'ai', text: '⚠️ Something went wrong getting your greeting.' }]);
     }
   };
-
+  
   const sendMessage = async (msg = input) => {
     if (!msg.trim()) return;
     setMessages((prev) => [...prev, { sender: 'player', text: msg }]);
@@ -162,23 +165,27 @@ function App() {
     setRollPrompt(null);
     setQuestionMode(false);
     setLastPlayerQuestion(msg);
+  
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: playerName, message: msg })
       });
       const data = await res.json();
-      const { storyPart, choices } = parseResponse(data.response);
+      const storyPart = data.response;
+      const choices = data.options || [];
+  
       detectRollRequest(storyPart);
       extractMemory(storyPart);
       await streamMessage(storyPart, () => {
-        setOptions(choices);
+        setOptions(choices); // ✅ Buttons will now appear
       });
     } catch (err) {
       console.error('Error:', err);
       setMessages((prev) => [...prev, { sender: 'ai', text: '⚠️ Something went wrong talking to the Dungeon Master.' }]);
     }
   };
+  
 
   const handleOptionClick = (option) => {
     setInput(option);
