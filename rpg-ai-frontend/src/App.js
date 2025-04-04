@@ -19,22 +19,34 @@ const character = {
 };
 
 const parseResponse = (response) => {
-  const [storyPart, choicePart] = response.split(/Choices:/i);
+  let storyPart = response;
+  let choicePart = '';
 
-  // fallback: if dash bullets are not used, split by lines starting with a dash
+  // Check if there's a "Choices:" section
+  if (/Choices:/i.test(response)) {
+    [storyPart, choicePart] = response.split(/Choices:/i);
+  } else {
+    // Try to extract implied choices from story body (e.g. bullet list or lines starting with '-')
+    const bulletStart = response.match(/([-*•]\s+.+(\n|$))+/);
+    if (bulletStart) {
+      const index = response.indexOf(bulletStart[0]);
+      storyPart = response.slice(0, index).trim();
+      choicePart = response.slice(index).trim();
+    }
+  }
+
   const rawChoices = choicePart
-    ? choicePart
-        .split(/\n|\r/) // split by line
-        .map(line => line.trim())
-        .filter(line => line.length > 0 && (/^[-\u2022*]/.test(line) || /^[A-Z]/.test(line)))
-        .map(line => line.replace(/^[-\u2022*]\s*/, ''))
-    : [];
+    .split('\n')
+    .map(line => line.replace(/^[-•*]\s*/, '').trim())
+    .filter(line => line.length > 0);
 
   console.log('📜 Story:', storyPart);
   console.log('🧠 Raw Choices:', choicePart);
   console.log('✅ Parsed choices:', rawChoices);
-  return { storyPart: storyPart.trim(), choices: rawChoices };
+
+  return { storyPart, choices: rawChoices };
 };
+
 
 function App() {
   const [playerName, setPlayerName] = useState('');
