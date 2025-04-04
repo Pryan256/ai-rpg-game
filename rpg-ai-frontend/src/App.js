@@ -268,6 +268,16 @@ function App() {
               ))}
             </div>
 
+            <form onSubmit={(e) => { e.preventDefault(); sendMessage(input); }} className="floating-input">
+              <input type="text" placeholder="Ask a question..." value={input} onChange={(e) => setInput(e.target.value)} />
+              <div className="options horizontal">
+                {options.map((option, i) => (
+                  <button key={i} onClick={() => handleOptionClick(option)}>{option}</button>
+                ))}
+                <button onClick={clearMemory}>🧼 Clear Memory</button>
+              </div>
+            </form>
+
             {rollPrompt && (
               <div className="roll-section">
                 {lastRollContext && (
@@ -279,21 +289,6 @@ function App() {
                   🎲 Roll {rollPrompt.ability} Check{rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ''}
                 </button>
               </div>
-            )}
-
-            <div className="options">
-              {options.map((option, i) => (
-                <button key={i} onClick={() => handleOptionClick(option)}>{option}</button>
-              ))}
-              <button onClick={() => setQuestionMode(true)}>❓ Ask a question</button>
-              <button onClick={clearMemory}>🧼 Clear Memory</button>
-            </div>
-
-            {questionMode && (
-              <form onSubmit={(e) => { e.preventDefault(); sendMessage(input); }}>
-                <input type="text" placeholder="Ask the DM a question..." value={input} onChange={(e) => setInput(e.target.value)} />
-                <button type="submit">Send</button>
-              </form>
             )}
           </div>
 

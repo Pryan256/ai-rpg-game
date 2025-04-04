@@ -214,3 +214,39 @@ button:hover {
   100% { opacity: 0.2; }
 }
 
+.floating-input {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 1rem 0 0;
+  border-top: 2px solid #e3d6c1;
+  background-color: #fffef9;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+.floating-input input[type="text"] {
+  font-size: 1rem;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.options.horizontal {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.options.horizontal button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+
