@@ -249,14 +249,23 @@ button:hover {
 
 .options.horizontal {
   display: flex;
-  flex-wrap: nowrap; /* 🔒 Prevent wrapping */
-  overflow-x: auto;   /* 🔄 Enable horizontal scroll */
+  flex-wrap: nowrap;          /* No wrapping */
+  overflow-x: auto;           /* Scroll when overflow */
   overflow-y: hidden;
+  width: 100%;                /* 💡 Force to match text input width */
   max-width: 100%;
   box-sizing: border-box;
   padding-bottom: 0.5rem;
-  padding-right: 4px; /* Ensure scroll bar doesn't cut off edge */
   scrollbar-width: thin;
+}
+
+.options.horizontal::-webkit-scrollbar {
+  height: 8px;
+}
+
+.options.horizontal::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
 }
 
 .options.horizontal button {
