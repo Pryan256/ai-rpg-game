@@ -234,6 +234,7 @@ button:hover {
   bottom: 0;
   z-index: 10;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .floating-input input[type="text"] {
@@ -248,16 +249,21 @@ button:hover {
 
 .options.horizontal {
   display: flex;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
-  overflow-x: auto;
+  flex-wrap: nowrap; /* 🔒 Prevent wrapping */
+  overflow-x: auto;   /* 🔄 Enable horizontal scroll */
+  overflow-y: hidden;
   max-width: 100%;
+  box-sizing: border-box;
+  padding-bottom: 0.5rem;
+  padding-right: 4px; /* Ensure scroll bar doesn't cut off edge */
+  scrollbar-width: thin;
 }
 
 .options.horizontal button {
   flex: 0 0 auto;
   white-space: nowrap;
 }
+
 
 .options.horizontal button {
   flex: 0 0 auto;
