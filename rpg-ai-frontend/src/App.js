@@ -36,6 +36,7 @@ function App() {
     knownLaws: []
   });
   const [highlights, setHighlights] = useState([]);
+  const [isThinking, setIsThinking] = useState(false);
 
   const statModifier = (statScore) => Math.floor((statScore - 10) / 2);
 
@@ -99,6 +100,7 @@ function App() {
   const streamMessage = async (text, onDone = () => {}) => {
     const words = text.split(' ');
     let accumulated = '';
+    setIsThinking(true);
     setMessages((prev) => [...prev, { sender: 'ai', text: '' }]);
 
     words.forEach((word, index) => {
@@ -111,6 +113,7 @@ function App() {
           return updated;
         });
         if (index === words.length - 1) {
+          setIsThinking(false);
           onDone();
         }
       }, index * 40);
@@ -122,27 +125,23 @@ function App() {
     if (!playerName.trim()) return;
     setSubmitted(true);
     character.name = playerName;
-  
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: playerName, message: 'start' })
       });
       const data = await res.json();
-      const storyPart = data.response;
-      const choices = data.options || [];
-  
+      const [storyPart, choicePart] = data.response.split(/Choices:/i);
+      const choices = choicePart?.trim().split(/\n|-/).map(l => l.trim()).filter(Boolean) || [];
       detectRollRequest(storyPart);
       extractMemory(storyPart);
-      await streamMessage(storyPart, () => {
-        setOptions(choices); // ✅ Buttons will now appear
-      });
+      await streamMessage(storyPart, () => setOptions(choices));
     } catch (err) {
       console.error('Error:', err);
       setMessages([{ sender: 'ai', text: '⚠️ Something went wrong getting your greeting.' }]);
     }
   };
-  
+
   const sendMessage = async (msg = input) => {
     if (!msg.trim()) return;
     setMessages((prev) => [...prev, { sender: 'player', text: msg }]);
@@ -151,27 +150,22 @@ function App() {
     setRollPrompt(null);
     setQuestionMode(false);
     setLastPlayerQuestion(msg);
-  
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: playerName, message: msg })
       });
       const data = await res.json();
-      const storyPart = data.response;
-      const choices = data.options || [];
-  
+      const [storyPart, choicePart] = data.response.split(/Choices:/i);
+      const choices = choicePart?.trim().split(/\n|-/).map(l => l.trim()).filter(Boolean) || [];
       detectRollRequest(storyPart);
       extractMemory(storyPart);
-      await streamMessage(storyPart, () => {
-        setOptions(choices); // ✅ Buttons will now appear
-      });
+      await streamMessage(storyPart, () => setOptions(choices));
     } catch (err) {
       console.error('Error:', err);
       setMessages((prev) => [...prev, { sender: 'ai', text: '⚠️ Something went wrong talking to the Dungeon Master.' }]);
     }
   };
-  
 
   const handleOptionClick = (option) => {
     setInput(option);
@@ -237,6 +231,11 @@ function App() {
                   />
                 </div>
               ))}
+              {isThinking && (
+                <div className="dm-thinking">
+                  <strong>DM:</strong> Thinking<span className="dots"><span>.</span><span>.</span><span>.</span></span>
+                </div>
+              )}
             </div>
 
             {rollPrompt && (
