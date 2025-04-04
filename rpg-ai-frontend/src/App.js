@@ -19,34 +19,18 @@ const character = {
 };
 
 const parseResponse = (response) => {
-  let storyPart = response;
-  let choicePart = '';
-
-  // Check if there's a "Choices:" section
-  if (/Choices:/i.test(response)) {
-    [storyPart, choicePart] = response.split(/Choices:/i);
-  } else {
-    // Try to extract implied choices from story body (e.g. bullet list or lines starting with '-')
-    const bulletStart = response.match(/([-*•]\s+.+(\n|$))+/);
-    if (bulletStart) {
-      const index = response.indexOf(bulletStart[0]);
-      storyPart = response.slice(0, index).trim();
-      choicePart = response.slice(index).trim();
-    }
-  }
-
+  const [storyPart, choicePart] = response.split(/Choices:/i);
   const rawChoices = choicePart
-    .split('\n')
-    .map(line => line.replace(/^[-•*]\s*/, '').trim())
-    .filter(line => line.length > 0);
-
+    ? choicePart
+        .split('\n')
+        .map(line => line.replace(/^[-\u2022*]\s*/, '').trim())
+        .filter(line => line.length > 0)
+    : [];
   console.log('📜 Story:', storyPart);
   console.log('🧠 Raw Choices:', choicePart);
   console.log('✅ Parsed choices:', rawChoices);
-
-  return { storyPart, choices: rawChoices };
+  return { storyPart: storyPart.trim(), choices: rawChoices };
 };
-
 
 function App() {
   const [playerName, setPlayerName] = useState('');
@@ -126,7 +110,7 @@ function App() {
     }
   };
 
-  const streamMessage = async (text) => {
+  const streamMessage = async (text, onDone = () => {}) => {
     const words = text.split(' ');
     let accumulated = '';
     setMessages((prev) => [...prev, { sender: 'ai', text: '' }]);
@@ -140,6 +124,9 @@ function App() {
           if (last.sender === 'ai') last.text = accumulated;
           return updated;
         });
+        if (index === words.length - 1) {
+          onDone();
+        }
       }, index * 40);
     });
   };
@@ -156,10 +143,11 @@ function App() {
       });
       const data = await res.json();
       const { storyPart, choices } = parseResponse(data.response);
-      setOptions(choices);
       detectRollRequest(storyPart);
       extractMemory(storyPart);
-      await streamMessage(storyPart);
+      await streamMessage(storyPart, () => {
+        setOptions(choices);
+      });
     } catch (err) {
       console.error('Error:', err);
       setMessages([{ sender: 'ai', text: '⚠️ Something went wrong getting your greeting.' }]);
@@ -181,10 +169,11 @@ function App() {
       });
       const data = await res.json();
       const { storyPart, choices } = parseResponse(data.response);
-      setOptions(choices);
       detectRollRequest(storyPart);
       extractMemory(storyPart);
-      await streamMessage(storyPart);
+      await streamMessage(storyPart, () => {
+        setOptions(choices);
+      });
     } catch (err) {
       console.error('Error:', err);
       setMessages((prev) => [...prev, { sender: 'ai', text: '⚠️ Something went wrong talking to the Dungeon Master.' }]);
