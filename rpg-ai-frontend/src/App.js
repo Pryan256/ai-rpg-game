@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
+import { v4 as uuidv4 } from 'uuid';
 
 const character = {
   name: '',
@@ -17,7 +18,6 @@ const character = {
   },
   inventory: ['Spellbook', 'Staff', 'Potion of Healing']
 };
-
 
 function App() {
   const [playerName, setPlayerName] = useState('');
@@ -38,11 +38,24 @@ function App() {
   });
   const [highlights, setHighlights] = useState([]);
 
+  // 🔐 Generate or retrieve session ID
+  const [sessionId] = useState(() => {
+    const stored = localStorage.getItem('sessionId');
+    if (stored) return stored;
+    const newId = uuidv4();
+    localStorage.setItem('sessionId', newId);
+    return newId;
+  });
+
   const statModifier = (statScore) => Math.floor((statScore - 10) / 2);
 
   const clearMemory = async () => {
     try {
-      await fetch(`${process.env.REACT_APP_API_URL}/clear-memory`, { method: 'POST' });
+      await fetch(`${process.env.REACT_APP_API_URL}/clear-memory`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId })
+      });
       setMemory({ quest: '', knownCharacters: [], knownItems: [], knownLocations: [], knownLaws: [] });
       setHighlights([]);
     } catch (err) {
@@ -80,7 +93,7 @@ function App() {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/extract-memory`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
+        body: JSON.stringify({ text, sessionId })
       });
       const extracted = await res.json();
       const safe = (val) => Array.isArray(val) ? val : [];
@@ -123,27 +136,28 @@ function App() {
     if (!playerName.trim()) return;
     setSubmitted(true);
     character.name = playerName;
-  
+
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: playerName, message: 'start' })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: playerName, message: 'start', sessionId })
       });
       const data = await res.json();
       const storyPart = data.response;
       const choices = data.options || [];
-  
+
       detectRollRequest(storyPart);
       extractMemory(storyPart);
       await streamMessage(storyPart, () => {
-        setOptions(choices); // ✅ Buttons will now appear
+        setOptions(choices);
       });
     } catch (err) {
       console.error('Error:', err);
       setMessages([{ sender: 'ai', text: '⚠️ Something went wrong getting your greeting.' }]);
     }
   };
-  
+
   const sendMessage = async (msg = input) => {
     if (!msg.trim()) return;
     setMessages((prev) => [...prev, { sender: 'player', text: msg }]);
@@ -152,27 +166,27 @@ function App() {
     setRollPrompt(null);
     setQuestionMode(false);
     setLastPlayerQuestion(msg);
-  
+
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: playerName, message: msg })
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: playerName, message: msg, sessionId })
       });
       const data = await res.json();
       const storyPart = data.response;
       const choices = data.options || [];
-  
+
       detectRollRequest(storyPart);
       extractMemory(storyPart);
       await streamMessage(storyPart, () => {
-        setOptions(choices); // ✅ Buttons will now appear
+        setOptions(choices);
       });
     } catch (err) {
       console.error('Error:', err);
       setMessages((prev) => [...prev, { sender: 'ai', text: '⚠️ Something went wrong talking to the Dungeon Master.' }]);
     }
   };
-  
 
   const handleOptionClick = (option) => {
     setInput(option);
