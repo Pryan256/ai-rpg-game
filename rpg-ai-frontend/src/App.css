@@ -19,13 +19,12 @@ html, body, #root, .App {
 }
 
 .main-grid {
-  min-height: calc(100vh - 4rem); /* account for h1 + padding */
   display: grid;
   grid-template-columns: 260px 1fr 260px;
   gap: 2rem;
   max-width: 1440px;
   margin: 0 auto;
-  align-items: flex-start;
+  height: calc(100vh - 4rem);
 }
 
 /* Character Panel */
@@ -55,7 +54,9 @@ html, body, #root, .App {
 
 /* Game (chat) area */
 .game-area {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   width: 100%;
 }
 
@@ -65,14 +66,15 @@ html, body, #root, .App {
   border: 2px solid #e3d6c1;
   border-radius: 8px;
   padding: 1.25rem;
-  height: 500px;
+  flex-grow: 1;
   overflow-y: auto;
   text-align: left;
-  margin-bottom: 1.5rem;
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   font-size: 1.05rem;
   line-height: 1.6;
+  min-height: 0;
 }
+
 
 .chat-box .ai,
 .chat-box .player {
@@ -246,10 +248,10 @@ button:hover {
 
 .options.horizontal {
   display: flex;
-  overflow-x: auto;
   gap: 0.5rem;
   padding: 0.5rem 0;
-  scrollbar-width: thin;
+  overflow-x: auto;
+  max-width: 100%;
 }
 
 .options.horizontal button {
