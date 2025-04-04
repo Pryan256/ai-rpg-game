@@ -57,11 +57,10 @@ html, body, #root, .App {
   flex-direction: column;
   height: 100%;
   width: 100%;
-  max-width: 800px; /* 🧱 Set your preferred max width */
-  margin: 0 auto;   /* 🎯 Center horizontally */
+  max-width: 800px;
+  margin: 0 auto;
   box-sizing: border-box;
 }
-
 
 /* Emphasized chat-box styling */
 .chat-box {
@@ -77,7 +76,6 @@ html, body, #root, .App {
   line-height: 1.6;
   min-height: 0;
 }
-
 
 .chat-box .ai,
 .chat-box .player {
@@ -134,6 +132,9 @@ button {
   border-radius: 6px;
   cursor: pointer;
   margin: 0.5rem;
+  white-space: nowrap;
+  width: auto;
+  max-width: none;
 }
 
 button:hover {
@@ -259,15 +260,17 @@ button:hover {
   box-sizing: border-box;
   gap: 0.5rem;
   padding: 0.5rem 0;
+  scrollbar-width: none;         /* Firefox */
+  -ms-overflow-style: none;      /* IE/Edge */
 }
 
 .options.horizontal::-webkit-scrollbar {
-  height: 8px;
+  display: none;                 /* Chrome/Safari */
 }
 
-.options.horizontal::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
+.options.horizontal button {
+  flex: none;
+  white-space: nowrap;
+  width: auto;
+  max-width: none;
 }
-
-
