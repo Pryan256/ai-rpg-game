@@ -279,3 +279,15 @@ button:hover {
   width: auto;
   max-width: none;
 }
+
+.options.horizontal::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 40px;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, #fffef9);
+}
+
