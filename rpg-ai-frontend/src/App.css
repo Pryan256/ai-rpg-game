@@ -254,7 +254,7 @@ button:hover {
 .options.horizontal {
   display: flex;
   flex-wrap: nowrap;
-  overflow-x: auto;
+  overflow-x: scroll;
   overflow-y: hidden;
   max-width: 100%; /* 🔥 Add this */
   width: 100%;
