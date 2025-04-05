@@ -60,18 +60,15 @@ html, body, #root, .App {
   max-width: 800px;
   margin: 0 auto;
   box-sizing: border-box;
+  padding-bottom: 1.5rem;
 }
 
 /* Emphasized chat-box styling */
 .chat-box {
-  background: #fffef9;
-  border: 2px solid #e3d6c1;
-  border-radius: 8px;
   padding: 1.25rem;
   flex-grow: 1;
   overflow-y: auto;
   text-align: left;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   font-size: 1.05rem;
   line-height: 1.6;
   min-height: 0;
@@ -229,16 +226,19 @@ button:hover {
 
 /* Scrollable horizontal options */
 .floating-input {
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-  box-sizing: border-box;
   background-color: #fffef9;
-  padding: 1rem 0 0;
-  border-top: 2px solid #e3d6c1;
-  position: sticky;
+  /* border-top: 2px solid #e3d6c1; */
   bottom: 0;
+  box-sizing: border-box;
+  margin: 0 auto;
+  max-width: 800px;
+  padding: 1rem;
+  position: sticky;
+  width: 100%;
   z-index: 10;
+  box-shadow: 0px 5px 16px 5px rgba(75, 55, 5, 0.2);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(75, 55, 5, 0.3);
 }
 
 .floating-input input[type="text"] {
