@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import './App.css';
 import { v4 as uuidv4 } from 'uuid';
+import React, { useState, useEffect } from 'react';
+
 
 const character = {
   name: '',
@@ -216,6 +218,53 @@ function App() {
     setRollPrompt(null);
     setLastRollContext('');
   };
+
+  useEffect(() => {
+    const container = document.querySelector('.options.horizontal');
+    if (!container) return;
+  
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+  
+    const mouseDown = (e) => {
+      isDown = true;
+      container.classList.add('dragging');
+      startX = e.pageX - container.offsetLeft;
+      scrollLeft = container.scrollLeft;
+    };
+  
+    const mouseLeave = () => {
+      isDown = false;
+      container.classList.remove('dragging');
+    };
+  
+    const mouseUp = () => {
+      isDown = false;
+      container.classList.remove('dragging');
+    };
+  
+    const mouseMove = (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - container.offsetLeft;
+      const walk = (x - startX) * 1.5;
+      container.scrollLeft = scrollLeft - walk;
+    };
+  
+    container.addEventListener('mousedown', mouseDown);
+    container.addEventListener('mouseleave', mouseLeave);
+    container.addEventListener('mouseup', mouseUp);
+    container.addEventListener('mousemove', mouseMove);
+  
+    return () => {
+      container.removeEventListener('mousedown', mouseDown);
+      container.removeEventListener('mouseleave', mouseLeave);
+      container.removeEventListener('mouseup', mouseUp);
+      container.removeEventListener('mousemove', mouseMove);
+    };
+  }, []);
+  
 
   return (
     <div className="App">
