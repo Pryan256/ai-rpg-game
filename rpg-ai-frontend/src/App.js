@@ -221,7 +221,13 @@ function App() {
 
   return (
     <div className="App">
-      <h1>🧙 AI Dungeon Master</h1>
+      <header className="top-nav">
+  <div className="nav-content">
+    <span className="logo">🧙 AI Dungeon Master</span>
+    {/* Future nav links can go here */}
+  </div>
+</header>
+
       {!submitted ? (
         <form onSubmit={handleNameSubmit} className="name-form">
           <input type="text" placeholder="Enter your character name..." value={playerName} onChange={(e) => setPlayerName(e.target.value)} />
