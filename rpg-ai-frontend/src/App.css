@@ -276,7 +276,6 @@ button:hover {
 .options.horizontal::-webkit-scrollbar {
   display: none;
 }
-.options.horizontal button {
   
 .options.horizontal button {
   flex: 0 0 auto;
