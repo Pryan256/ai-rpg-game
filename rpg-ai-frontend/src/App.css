@@ -11,7 +11,6 @@ h1 {
   margin-bottom: 2rem;
 }
 
-/* Full-height layout */
 html, body, #root, .App {
   height: 100%;
   margin: 0;
@@ -27,7 +26,6 @@ html, body, #root, .App {
   height: calc(100vh - 4rem);
 }
 
-/* Character Panel */
 .character-sheet {
   background-color: #fffaf4;
   border: 2px solid #d6bfa7;
@@ -63,7 +61,6 @@ html, body, #root, .App {
   padding-bottom: 1.5rem;
 }
 
-/* Emphasized chat-box styling */
 .chat-box {
   padding: 1.25rem;
   flex-grow: 1;
@@ -87,7 +84,6 @@ html, body, #root, .App {
   margin-bottom: 0.25rem;
 }
 
-/* Memory Sidebar */
 .memory-sidebar {
   width: 100%;
   padding: 1rem;
@@ -110,7 +106,6 @@ html, body, #root, .App {
   line-height: 1.4;
 }
 
-/* Inputs and Buttons */
 input {
   width: 100%;
   padding: 0.5rem;
@@ -138,14 +133,6 @@ button:hover {
   background: #593a21;
 }
 
-.options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: flex-start;
-}
-
-/* Ask form and roll */
 .roll-section {
   margin: 1rem 0;
   text-align: left;
@@ -157,33 +144,34 @@ button:hover {
   color: #555;
 }
 
-/* Highlighting */
 .highlight-character {
   background-color: rgba(255, 165, 0, 0.3);
   color: rgba(50, 32, 0, 1);
   border-radius: 100px;
-  padding:4px;
+  padding: 4px;
 }
+
 .highlight-location {
   background-color: rgba(100, 149, 237, 0.3);
   color: rgb(16, 36, 71);
   border-radius: 100px;
-  padding:4px;
+  padding: 4px;
 }
+
 .highlight-item {
   background-color: rgba(60, 179, 113, 0.3);
   color: rgb(13, 60, 34);
   border-radius: 100px;
-  padding:4px;
+  padding: 4px;
 }
+
 .highlight-law {
   background-color: rgba(221, 160, 221, 0.3);
   color: rgb(41, 21, 41);
   border-radius: 100px;
-  padding:4px;
+  padding: 4px;
 }
 
-/* Responsive adjustments */
 @media screen and (max-width: 900px) {
   .main-grid {
     grid-template-columns: 1fr;
@@ -214,6 +202,7 @@ button:hover {
 .dots span:nth-child(2) {
   animation-delay: 0.3s;
 }
+
 .dots span:nth-child(3) {
   animation-delay: 0.6s;
 }
@@ -224,10 +213,8 @@ button:hover {
   100% { opacity: 0.2; }
 }
 
-/* Scrollable horizontal options */
 .floating-input {
   background-color: #fffef9;
-  /* border-top: 2px solid #e3d6c1; */
   bottom: 0;
   box-sizing: border-box;
   margin: 0 auto;
@@ -251,50 +238,16 @@ button:hover {
   box-sizing: border-box;
 }
 
-.options.horizontal {
-  display: flex;
-  flex-wrap: nowrap;
-  overflow-x: scroll; /* ✅ Use scroll instead of auto */
-  overflow-y: hidden;
-  width: 100%;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
-  scrollbar-width: thin; /* For Firefox */
-  -webkit-overflow-scrolling: touch; /* Smooth on iOS */
-  scroll-behavior: smooth;
-  cursor: grab; /* 👈 optional: shows grab cursor */
-}
-
-.options.horizontal:active {
-  cursor: grabbing;
-}
-
-.options.horizontal.dragging {
-  user-select: none;        /* Standard */
-  -webkit-user-select: none; /* Safari */
-  -ms-user-select: none;     /* IE/Edge */
-  cursor: grabbing;
-}
-
-.options.horizontal::-webkit-scrollbar {
-  display: none;
-}
-  
-.options.horizontal button {
-  flex: 0 0 auto;
-  white-space: nowrap;
-  width: auto;
-  max-width: none;
-}
-
-.options.horizontal::after {
-  content: '';
+.popup-actions {
   position: absolute;
-  right: 0;
-  top: 0;
-  height: 100%;
-  width: 40px;
-  pointer-events: none;
-  background: linear-gradient(to right, transparent, #fffef9);
+  background: #fffaf4;
+  border: 1px solid #d6bfa7;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  margin-top: 0.5rem;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
-

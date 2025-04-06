@@ -25,6 +25,7 @@ function App() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [options, setOptions] = useState([]);
+  const [showActions, setShowActions] = useState(false);
   const [rollPrompt, setRollPrompt] = useState(null);
 
   const [lastRollContext, setLastRollContext] = useState('');
@@ -38,8 +39,6 @@ function App() {
   });
   const [highlights, setHighlights] = useState([]);
   const [loadingDM, setLoadingDM] = useState(false);
-
-  const optionsRef = useRef(null);
 
   const [sessionId] = useState(() => {
     const stored = localStorage.getItem('sessionId');
@@ -187,6 +186,7 @@ function App() {
       extractMemory(storyPart);
       await streamMessage(storyPart, () => {
         setOptions(choices);
+        setShowActions(false);
       });
     } catch (err) {
       console.error('Error:', err);
@@ -218,52 +218,6 @@ function App() {
     setRollPrompt(null);
     setLastRollContext('');
   };
-
-  useEffect(() => {
-    const container = optionsRef.current;
-    if (!container) return;
-
-    let isDown = false;
-    let startX;
-    let scrollLeft;
-
-    const mouseDown = (e) => {
-      isDown = true;
-      container.classList.add('dragging');
-      startX = e.pageX - container.offsetLeft;
-      scrollLeft = container.scrollLeft;
-    };
-
-    const mouseLeave = () => {
-      isDown = false;
-      container.classList.remove('dragging');
-    };
-
-    const mouseUp = () => {
-      isDown = false;
-      container.classList.remove('dragging');
-    };
-
-    const mouseMove = (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - container.offsetLeft;
-      const walk = (x - startX) * 1.5;
-      container.scrollLeft = scrollLeft - walk;
-    };
-
-    container.addEventListener('mousedown', mouseDown);
-    container.addEventListener('mouseleave', mouseLeave);
-    container.addEventListener('mouseup', mouseUp);
-    container.addEventListener('mousemove', mouseMove);
-
-    return () => {
-      container.removeEventListener('mousedown', mouseDown);
-      container.removeEventListener('mouseleave', mouseLeave);
-      container.removeEventListener('mouseup', mouseUp);
-      container.removeEventListener('mousemove', mouseMove);
-    };
-  }, []);
 
   return (
     <div className="App">
@@ -318,12 +272,17 @@ function App() {
 
             <form onSubmit={(e) => { e.preventDefault(); sendMessage(input); }} className="floating-input">
               <input type="text" placeholder="Ask a question..." value={input} onChange={(e) => setInput(e.target.value)} />
-              <div className="options horizontal" ref={optionsRef}>
-                {options.map((option, i) => (
-                  <button key={i} onClick={() => handleOptionClick(option)}>{option}</button>
-                ))}
-                <button onClick={clearMemory}>🧼 Clear Memory</button>
-              </div>
+              <button type="button" onClick={() => setShowActions(prev => !prev)}>
+                ⚔️ Actions
+              </button>
+              {showActions && (
+                <div className="popup-actions">
+                  {options.map((option, i) => (
+                    <button key={i} onClick={() => handleOptionClick(option)}>{option}</button>
+                  ))}
+                  <button onClick={clearMemory}>🧼 Clear Memory</button>
+                </div>
+              )}
             </form>
 
             {rollPrompt && (
