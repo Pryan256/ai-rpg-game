@@ -270,6 +270,9 @@ button:hover {
 }
 
 .options.horizontal.dragging {
+  user-select: none;        /* Standard */
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none;     /* IE/Edge */
   cursor: grabbing;
 }
 
