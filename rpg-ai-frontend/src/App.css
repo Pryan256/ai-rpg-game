@@ -254,19 +254,22 @@ button:hover {
 .options.horizontal {
   display: flex;
   flex-wrap: nowrap;
-  overflow-x: scroll;
+  overflow-x: scroll; /* ✅ Use scroll instead of auto */
   overflow-y: hidden;
-  max-width: 100%; /* 🔥 Add this */
   width: 100%;
-  box-sizing: border-box;
   gap: 0.5rem;
   padding: 0.5rem 0;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  cursor: grab;
+  scrollbar-width: thin; /* For Firefox */
+  -webkit-overflow-scrolling: touch; /* Smooth on iOS */
+  scroll-behavior: smooth;
+  cursor: grab; /* 👈 optional: shows grab cursor */
 }
 
 .options.horizontal:active {
+  cursor: grabbing;
+}
+
+.options.horizontal.dragging {
   cursor: grabbing;
 }
 
@@ -274,7 +277,9 @@ button:hover {
   display: none;
 }
 .options.horizontal button {
-  flex: none;
+  
+.options.horizontal button {
+  flex: 0 0 auto;
   white-space: nowrap;
   width: auto;
   max-width: none;
