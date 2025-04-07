@@ -131,7 +131,7 @@ button:hover {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  padding: 1.5rem 1rem 10rem;
+  padding: 1.5rem 1rem 12rem;
   text-align: left;
   font-size: 1.05rem;
   line-height: 1.6;
