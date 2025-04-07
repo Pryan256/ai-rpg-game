@@ -109,7 +109,7 @@ function App() {
         setCurrentTurn(prev => ({ ...prev, dm: accumulated }));
         if (i === words.length - 1) {
           onDone();
-          setLoadingDM(false);
+          //setLoadingDM(false);
         }
       }, i * 40);
     });
@@ -121,7 +121,7 @@ function App() {
     setOptions([]);
     setRollPrompt(null);
     setLastPlayerQuestion(msg);
-    setLoadingDM(true);
+    //setLoadingDM(true);
     setCurrentTurn({ player: msg, dm: '' });
 
     try {
