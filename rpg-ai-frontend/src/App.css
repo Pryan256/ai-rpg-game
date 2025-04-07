@@ -1,3 +1,10 @@
+/* === 📦 Base / Global === */
+html, body, #root, .App {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 .App {
   font-family: 'Georgia', serif;
   text-align: center;
@@ -9,121 +16,6 @@
 h1 {
   color: #6b4b2d;
   margin-bottom: 2rem;
-}
-
-html, body, #root, .App {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-.main-grid {
-  display: grid;
-  grid-template-columns: 260px minmax(0, 1fr) 260px;
-  gap: 2rem;
-  max-width: 100%;
-  margin: 0 auto;
-  height: calc(100vh - 4rem);
-}
-
-.character-sheet {
-  background-color: #fffaf4;
-  border: 2px solid #d6bfa7;
-  padding: 1.5rem;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  text-align: left;
-  position: sticky;
-  top: 6rem; /* Adjust depending on header height */
-  height: calc(100vh - 6rem); /* Fill the rest of the screen */
-  overflow-y: auto;
-}
-
-.character-sheet::-webkit-scrollbar,
-.memory-sidebar::-webkit-scrollbar {
-  width: 6px;
-}
-
-.character-sheet::-webkit-scrollbar-thumb,
-.memory-sidebar::-webkit-scrollbar-thumb {
-  background-color: #ccb99e;
-  border-radius: 4px;
-}
-
-.character-sheet h2 {
-  margin-top: 0;
-  font-size: 1.3rem;
-}
-
-.character-sheet ul {
-  list-style-type: none;
-  padding-left: 0;
-  margin: 0;
-}
-
-.character-sheet li {
-  margin-bottom: 0.25rem;
-}
-
-.game-area {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-  box-sizing: border-box;
-  padding-bottom: 1.5rem;
-}
-
-.chat-box {
-  padding: 1.25rem;
-  flex-grow: 1;
-  overflow-y: auto;
-  text-align: left;
-  font-size: 1.05rem;
-  line-height: 1.6;
-  min-height: 0;
-  max-height: 100%;
-}
-
-.chat-box .ai,
-.chat-box .player {
-  margin-bottom: 1rem;
-  display: block;
-}
-
-.chat-box strong {
-  font-weight: bold;
-  color: #6b4b2d;
-  display: inline-block;
-  margin-bottom: 0.25rem;
-}
-
-.memory-sidebar {
-  width: 100%;
-  padding: 1rem;
-  border: 2px solid #d6bfa7;
-  background-color: #fffaf4;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  font-size: 0.9rem;
-  text-align: left;
-  position: sticky;
-  top: 6rem;
-  height: calc(100vh - 6rem);
-  overflow-y: auto;
-}
-
-.memory-sidebar h2 {
-  margin-top: 0;
-  font-size: 1.3rem;
-  color: #6b4b2d;
-}
-
-.memory-sidebar p {
-  margin: 0.5rem 0;
-  line-height: 1.4;
 }
 
 input {
@@ -153,17 +45,138 @@ button:hover {
   background: #593a21;
 }
 
-.roll-section {
-  margin: 1rem 0;
+/* === 📀 Grid Layout === */
+.main-grid {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr) 260px;
+  gap: 2rem;
+  max-width: 100%;
+  margin: 0 auto;
+  height: calc(100vh - 4rem); /* Full height minus header */
+  overflow: hidden; /* Prevent main scroll */
+}
+
+/* === 🧙 Character Sheet === */
+.character-sheet {
+  background-color: #fffaf4;
+  border: 2px solid #d6bfa7;
+  padding: 1.5rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
   text-align: left;
+  position: sticky;
+  top: 6rem;
+  height: calc(100vh - 6rem);
+  overflow-y: auto;
 }
 
-.roll-context {
+.character-sheet h2 {
+  margin-top: 0;
+  font-size: 1.3rem;
+}
+
+.character-sheet ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.character-sheet li {
+  margin-bottom: 0.25rem;
+}
+
+/* === 🧠 Memory Sidebar === */
+.memory-sidebar {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid #d6bfa7;
+  background-color: #fffaf4;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  font-size: 0.9rem;
+  text-align: left;
+  position: sticky;
+  top: 6rem;
+  height: calc(100vh - 6rem);
+  overflow-y: auto;
+}
+
+.memory-sidebar h2 {
+  margin-top: 0;
+  font-size: 1.3rem;
+  color: #6b4b2d;
+}
+
+.memory-sidebar p {
+  margin: 0.5rem 0;
+  line-height: 1.4;
+}
+
+/* === 🕹 Game Area & Chat === */
+.game-area {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding-bottom: 1.5rem;
+  overflow-y: auto;
+}
+
+.chat-box {
+  padding: 1.25rem;
+  flex-grow: 1;
+  overflow-y: auto;
+  text-align: left;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  min-height: 0;
+  max-height: 100%;
+}
+
+.chat-box .ai,
+.chat-box .player {
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.chat-box strong {
+  font-weight: bold;
+  color: #6b4b2d;
+  display: inline-block;
+  margin-bottom: 0.25rem;
+}
+
+/* === 💬 Floating Input === */
+.floating-input {
+  background-color: #fffef9;
+  bottom: 0;
+  box-sizing: border-box;
+  margin: 0 auto;
+  max-width: 800px;
+  padding: 1rem;
+  position: fixed;
+  width: 100%;
+  z-index: 10;
+  box-shadow: 0px 5px 16px 5px rgba(75, 55, 5, 0.2);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(75, 55, 5, 0.3);
+  margin-bottom: 2rem;
+}
+
+.floating-input input[type="text"] {
+  font-size: 1rem;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
   margin-bottom: 0.5rem;
-  font-style: italic;
-  color: #555;
+  width: 100%;
+  box-sizing: border-box;
 }
 
+/* === 🎨 Highlights === */
 .highlight-character {
   background-color: rgba(255, 165, 0, 0.3);
   color: rgba(50, 32, 0, 1);
@@ -192,17 +205,7 @@ button:hover {
   padding: 4px;
 }
 
-@media screen and (max-width: 900px) {
-  .main-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .character-sheet,
-  .memory-sidebar {
-    width: 100%;
-  }
-}
-
+/* === 🧠 DM Thinking === */
 .dm-thinking {
   font-style: italic;
   color: #6b4b2d;
@@ -227,41 +230,10 @@ button:hover {
   animation-delay: 0.6s;
 }
 
-@keyframes blink {
-  0% { opacity: 0.2; }
-  20% { opacity: 1; }
-  100% { opacity: 0.2; }
-}
-
-.floating-input {
-  background-color: #fffef9;
-  bottom: 0;
-  box-sizing: border-box;
-  margin: 0 auto;
-  max-width: 800px;
-  padding: 1rem;
-  position: fixed;
-  width: 100%;
-  z-index: 10;
-  box-shadow: 0px 5px 16px 5px rgba(75, 55, 5, 0.2);
-  border-radius: 1.5rem;
-  border: 1px solid rgba(75, 55, 5, 0.3);
-  margin-bottom: 2rem;
-}
-
-.floating-input input[type="text"] {
-  font-size: 1rem;
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  margin-bottom: 0.5rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-
+/* === 🌞 Popup Actions === */
 .popup-actions {
   position: absolute;
-  bottom: 70px; /* Adjust height above the Actions button */
+  bottom: 70px;
   left: 50%;
   transform: translateX(-50%);
   background-color: #fffef9;
@@ -277,6 +249,7 @@ button:hover {
   pointer-events: auto;
 }
 
+/* === 🗾 Top Navigation === */
 .top-nav {
   background-color: #fffef9;
   border-bottom: 1px solid #d6bfa7;
@@ -302,4 +275,21 @@ button:hover {
   font-family: 'Georgia', serif;
 }
 
+/* === 📱 Media Queries === */
+@media screen and (max-width: 900px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
 
+  .character-sheet,
+  .memory-sidebar {
+    width: 100%;
+  }
+}
+
+/* === 🎞 Keyframes / Animations === */
+@keyframes blink {
+  0% { opacity: 0.2; }
+  20% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
