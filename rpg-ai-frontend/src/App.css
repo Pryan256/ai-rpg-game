@@ -145,8 +145,9 @@ button:hover {
   margin: 0 auto;
   width: 100%;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse; /* 👈 this makes new messages appear visually at the top */
 }
+
 
 .chat-box .ai,
 .chat-box .player {
