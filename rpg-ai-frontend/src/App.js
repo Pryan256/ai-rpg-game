@@ -81,6 +81,20 @@ function App() {
     }
   };
 
+  const clearMemory = async () => {
+    try {
+      await fetch(`${process.env.REACT_APP_API_URL}/clear-memory`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId })
+      });
+      setMemory({ quest: '', knownCharacters: [], knownItems: [], knownLocations: [], knownLaws: [] });
+      setHighlights([]);
+    } catch (err) {
+      console.error('Failed to clear memory:', err);
+    }
+  };
+
   const streamMessage = async (text, onDone = () => {}) => {
     const words = text.split(' ');
     let accumulated = '';
