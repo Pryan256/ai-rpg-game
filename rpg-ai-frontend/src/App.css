@@ -3,7 +3,7 @@ html, body, #root, .App {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* <-- Add this */
+  overflow: hidden;
 }
 
 .App {
@@ -13,40 +13,7 @@ html, body, #root, .App {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* prevents outer scroll */
-}
-
-
-h1 {
-  color: #6b4b2d;
-  margin-bottom: 2rem;
-}
-
-input {
-  width: 100%;
-  padding: 0.5rem;
-  font-size: 1rem;
-  margin-bottom: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-button {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  background: #6b4b2d;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  margin: 0.5rem;
-  white-space: nowrap;
-  width: auto;
-  max-width: none;
-}
-
-button:hover {
-  background: #593a21;
+  overflow: hidden;
 }
 
 /* === 📀 Grid Layout === */
@@ -58,7 +25,6 @@ button:hover {
   height: calc(100vh - 4rem);
   overflow: hidden;
 }
-
 
 /* === 🧙 Character Sheet === */
 .character-sheet {
@@ -129,12 +95,12 @@ button:hover {
 }
 
 .chat-box {
-  padding: 1.5rem 1rem 6rem; /* leave space for floating input */
   flex-grow: 1;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end; /* content grows UP */
+  justify-content: flex-end;
+  padding: 1.5rem 1rem 8rem;
   text-align: left;
   font-size: 1.05rem;
   line-height: 1.6;
@@ -147,6 +113,7 @@ button:hover {
 .chat-box-inner {
   max-width: 800px;
   margin: 0 auto;
+  width: 100%;
 }
 
 .chat-box .ai,
@@ -177,7 +144,6 @@ button:hover {
   border-radius: 1.5rem;
   border: 1px solid rgba(75, 55, 5, 0.3);
 }
-
 
 .floating-input input[type="text"] {
   font-size: 1rem;
@@ -268,7 +234,7 @@ button:hover {
   border-bottom: 1px solid #d6bfa7;
   color: #6b4b2d;
   padding: 1rem 2rem;
-  height: 4rem; /* force consistent height */
+  height: 4rem;
   box-sizing: border-box;
   position: sticky;
   top: 0;

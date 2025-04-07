@@ -1,4 +1,4 @@
-import React, { useState, useEffect  } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -48,12 +48,17 @@ function App() {
     return newId;
   });
 
+  const chatRef = useRef();
+
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      const box = document.querySelector('.chat-box');
-      if (box) box.scrollTop = box.scrollHeight;
-    }, 50);
-    return () => clearTimeout(timeout);
+    const el = chatRef.current;
+    if (!el) return;
+
+    const isAtBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 50;
+
+    if (isAtBottom) {
+      el.scrollTop = el.scrollHeight;
+    }
   }, [messages]);
 
   const statModifier = (statScore) => Math.floor((statScore - 10) / 2);
@@ -271,20 +276,21 @@ function App() {
               </div>
             )}
 
-            <div className="chat-box">
-              <div className="chat-box-inner">
-                {messages.map((msg, i) => (
-                  <div key={i} className={msg.sender}>
-                    <strong>{msg.sender === 'ai' ? 'DM' : playerName}:</strong>{' '}
-                    <span
-                      dangerouslySetInnerHTML={{
-                        __html: msg.sender === 'ai' ? highlightText(msg.text, highlights) : msg.text
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
+          <div className="chat-box" ref={chatRef}>
+            <div className="chat-box-inner">
+              {messages.map((msg, i) => (
+                <div key={i} className={msg.sender}>
+                  <strong>{msg.sender === 'ai' ? 'DM' : playerName}:</strong>{' '}
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: msg.sender === 'ai' ? highlightText(msg.text, highlights) : msg.text
+                    }}
+                  />
+                </div>
+              ))}
             </div>
+          </div>
+
 
             <form onSubmit={(e) => { e.preventDefault(); sendMessage(input); }} className="floating-input">
               <input type="text" placeholder="Ask a question..." value={input} onChange={(e) => setInput(e.target.value)} />
