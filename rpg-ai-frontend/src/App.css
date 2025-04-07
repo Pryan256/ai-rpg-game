@@ -33,6 +33,21 @@ html, body, #root, .App {
   border-radius: 12px;
   font-size: 0.9rem;
   text-align: left;
+  position: sticky;
+  top: 6rem; /* Adjust depending on header height */
+  height: calc(100vh - 6rem); /* Fill the rest of the screen */
+  overflow-y: auto;
+}
+
+.character-sheet::-webkit-scrollbar,
+.memory-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.character-sheet::-webkit-scrollbar-thumb,
+.memory-sidebar::-webkit-scrollbar-thumb {
+  background-color: #ccb99e;
+  border-radius: 4px;
 }
 
 .character-sheet h2 {
@@ -94,6 +109,10 @@ html, body, #root, .App {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   font-size: 0.9rem;
   text-align: left;
+  position: sticky;
+  top: 6rem;
+  height: calc(100vh - 6rem);
+  overflow-y: auto;
 }
 
 .memory-sidebar h2 {
