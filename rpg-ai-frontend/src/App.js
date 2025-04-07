@@ -23,15 +23,23 @@ function App() {
   const [playerName, setPlayerName] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [input, setInput] = useState('');
-  const [turns, setTurns] = useState([]); // <-- new
+  const [messages, setMessages] = useState([]);
   const [options, setOptions] = useState([]);
   const [showActions, setShowActions] = useState(false);
   const [rollPrompt, setRollPrompt] = useState(null);
+
   const [lastRollContext, setLastRollContext] = useState('');
   const [lastPlayerQuestion, setLastPlayerQuestion] = useState('');
-  const [memory, setMemory] = useState({ quest: '', knownCharacters: [], knownItems: [], knownLocations: [], knownLaws: [] });
+  const [memory, setMemory] = useState({
+    quest: '',
+    knownCharacters: [],
+    knownItems: [],
+    knownLocations: [],
+    knownLaws: []
+  });
   const [highlights, setHighlights] = useState([]);
   const [loadingDM, setLoadingDM] = useState(false);
+
   const [sessionId] = useState(() => {
     const stored = localStorage.getItem('sessionId');
     if (stored) return stored;
@@ -43,43 +51,17 @@ function App() {
   const chatRef = useRef();
 
   useEffect(() => {
-    if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
-  }, [turns]);
+    const el = chatRef.current;
+    if (!el) return;
 
-  const statModifier = (score) => Math.floor((score - 10) / 2);
+    const isAtBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 50;
 
-  const highlightText = (text, highlights) => {
-    if (!Array.isArray(highlights)) return text;
-    let highlighted = text;
-    highlights.forEach(({ text: phrase, type }) => {
-      if (!phrase) return;
-      const regex = new RegExp(`\\b(${phrase.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')})\\b`, 'gi');
-      highlighted = highlighted.replace(regex, `<span class="highlight-${type}">$1</span>`);
-    });
-    return highlighted;
-  };
-
-  const extractMemory = async (text) => {
-    try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/extract-memory`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, sessionId })
-      });
-      const extracted = await res.json();
-      const safe = val => Array.isArray(val) ? val : [];
-      setMemory(prev => ({
-        quest: extracted.quest || prev.quest,
-        knownCharacters: [...new Set([...prev.knownCharacters, ...safe(extracted.knownCharacters)])],
-        knownItems: [...new Set([...prev.knownItems, ...safe(extracted.knownItems)])],
-        knownLocations: [...new Set([...prev.knownLocations, ...safe(extracted.knownLocations)])],
-        knownLaws: [...new Set([...prev.knownLaws, ...safe(extracted.knownLaws)])]
-      }));
-      setHighlights(safe(extracted.highlights));
-    } catch (err) {
-      console.error('Memory extraction failed:', err);
+    if (isAtBottom) {
+      el.scrollTop = el.scrollHeight;
     }
-  };
+  }, [messages]);
+
+  const statModifier = (statScore) => Math.floor((statScore - 10) / 2);
 
   const clearMemory = async () => {
     try {
@@ -92,50 +74,6 @@ function App() {
       setHighlights([]);
     } catch (err) {
       console.error('Failed to clear memory:', err);
-    }
-  };
-
-  const streamMessage = async (text, onDone = () => {}) => {
-    const words = text.split(' ');
-    let accumulated = '';
-    setTurns(prev => [...prev.slice(0, -1), { ...prev[prev.length - 1], dm: '' }]);
-    words.forEach((word, i) => {
-      setTimeout(() => {
-        accumulated += word + ' ';
-        setTurns(prev => {
-          const updated = [...prev];
-          updated[updated.length - 1].dm = accumulated;
-          return updated;
-        });
-        if (i === words.length - 1) {
-          onDone();
-          setLoadingDM(false);
-        }
-      }, i * 40);
-    });
-  };
-
-  const sendMessage = async (msg = input) => {
-    if (!msg.trim()) return;
-    setInput('');
-    setOptions([]);
-    setRollPrompt(null);
-    setLastPlayerQuestion(msg);
-    setTurns(prev => [...prev, { player: msg, dm: '' }]);
-    setLoadingDM(true);
-
-    try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: playerName, message: msg, sessionId })
-      });
-      const data = await res.json();
-      detectRollRequest(data.response);
-      extractMemory(data.response);
-      await streamMessage(data.response, () => setOptions(data.options || []));
-    } catch (err) {
-      console.error(err);
     }
   };
 
@@ -153,12 +91,126 @@ function App() {
     }
   };
 
+  const highlightText = (text, highlights) => {
+    if (!Array.isArray(highlights)) return text;
+    let highlighted = text;
+    highlights.forEach(({ text: phrase, type }) => {
+      if (!phrase || typeof phrase !== 'string') return;
+      const regex = new RegExp(`\\b(${phrase.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&')})\\b`, 'gi');
+      highlighted = highlighted.replace(regex, `<span class="highlight-${type}">$1</span>`);
+    });
+    return highlighted;
+  };
+
+  const extractMemory = async (text) => {
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/extract-memory`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, sessionId })
+      });
+      const extracted = await res.json();
+      const safe = (val) => Array.isArray(val) ? val : [];
+      setMemory(prev => ({
+        quest: extracted.quest || prev.quest,
+        knownCharacters: Array.from(new Set([...prev.knownCharacters, ...safe(extracted.knownCharacters)])),
+        knownItems: Array.from(new Set([...prev.knownItems, ...safe(extracted.knownItems)])),
+        knownLocations: Array.from(new Set([...prev.knownLocations, ...safe(extracted.knownLocations)])),
+        knownLaws: Array.from(new Set([...prev.knownLaws, ...safe(extracted.knownLaws)]))
+      }));
+      setHighlights(safe(extracted.highlights));
+    } catch (err) {
+      console.error('Memory extraction failed:', err);
+    }
+  };
+
+  const streamMessage = async (text, onDone = () => {}) => {
+    const words = text.split(' ');
+    let accumulated = '';
+    setMessages((prev) => [...prev, { sender: 'ai', text: '' }]);
+
+    words.forEach((word, index) => {
+      setTimeout(() => {
+        accumulated += word + ' ';
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[updated.length - 1];
+          if (last.sender === 'ai') last.text = accumulated;
+          return updated;
+        });
+        if (index === words.length - 1) {
+          onDone();
+          setLoadingDM(false);
+        }
+      }, index * 40);
+    });
+  };
+
   const handleNameSubmit = async (e) => {
     e.preventDefault();
     if (!playerName.trim()) return;
     setSubmitted(true);
     character.name = playerName;
-    sendMessage('start');
+    setLoadingDM(true);
+
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: playerName, message: 'start', sessionId })
+      });
+      const data = await res.json();
+      const storyPart = data.response;
+      const choices = data.options || [];
+
+      detectRollRequest(storyPart);
+      extractMemory(storyPart);
+      await streamMessage(storyPart, () => {
+        setOptions(choices);
+      });
+    } catch (err) {
+      console.error('Error:', err);
+      setMessages([{ sender: 'ai', text: '⚠️ Something went wrong getting your greeting.' }]);
+      setLoadingDM(false);
+    }
+  };
+
+  const sendMessage = async (msg = input) => {
+    if (!msg.trim()) return;
+    setMessages((prev) => [
+  ...prev,
+  { sender: 'player', text: msg },
+  { sender: 'ai', text: '' } // prep next response placeholder
+]);
+
+    setInput('');
+    setOptions([]);
+    setRollPrompt(null);
+
+    setLastPlayerQuestion(msg);
+    setLoadingDM(true);
+
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: playerName, message: msg, sessionId })
+      });
+      const data = await res.json();
+      const storyPart = data.response;
+      const choices = data.options || [];
+
+      detectRollRequest(storyPart);
+      extractMemory(storyPart);
+      await streamMessage(storyPart, () => {
+        setOptions(choices);
+        setShowActions(false);
+      });
+    } catch (err) {
+      console.error('Error:', err);
+      setMessages((prev) => [...prev, { sender: 'ai', text: '⚠️ Something went wrong talking to the Dungeon Master.' }]);
+      setLoadingDM(false);
+    }
   };
 
   const handleOptionClick = (option) => {
@@ -179,8 +231,10 @@ function App() {
     const total = roll + mod;
     const rollResult = `🎲 ${rollPrompt.ability} check${rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ''}: Rolled ${roll} + ${mod} = ${total}`;
     const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.\nThis was in response to my question: "${lastPlayerQuestion}" and the DM's prompt: "${lastRollContext}"`;
-    setTurns(prev => [...prev, { player: rollResult, dm: '' }]);
+    setMessages((prev) => [...prev, { sender: 'player', text: rollResult }]);
     sendMessage(playerMsg);
+    setRollPrompt(null);
+    setLastRollContext('');
   };
 
   return (
@@ -229,14 +283,18 @@ function App() {
 
           <div className="chat-box" ref={chatRef}>
             <div className="chat-box-inner">
-              {turns.map((turn, i) => (
-                <div key={i} className="chat-turn">
-                  <div className="player"><strong>{playerName}:</strong> {turn.player}</div>
-                  <div className="ai"><strong>DM:</strong> <span dangerouslySetInnerHTML={{ __html: highlightText(turn.dm, highlights) }} /></div>
+              {messages.map((msg, i) => (
+                <div key={i} className={msg.sender}>
+                  <strong>{msg.sender === 'ai' ? 'DM' : playerName}:</strong>{' '}
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: msg.sender === 'ai' ? highlightText(msg.text, highlights) : msg.text
+                    }}
+                  />
                 </div>
               ))}
             </div>
-           </div>
+          </div>
 
 
             <form onSubmit={(e) => { e.preventDefault(); sendMessage(input); }} className="floating-input">
