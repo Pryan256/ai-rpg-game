@@ -34,7 +34,7 @@ function App() {
   const [lastPlayerQuestion, setLastPlayerQuestion] = useState('');
   const [memory, setMemory] = useState({ quest: '', knownCharacters: [], knownItems: [], knownLocations: [], knownLaws: [] });
   const [highlights, setHighlights] = useState([]);
-  const [loadingDM, setLoadingDM] = useState(false);
+  //const [loadingDM, setLoadingDM] = useState(false);
   const [sessionId] = useState(() => {
     const stored = localStorage.getItem('sessionId');
     if (stored) return stored;
@@ -181,7 +181,7 @@ function App() {
     const roll = Math.floor(Math.random() * 20) + 1;
     const mod = statModifier(character.stats[statKey]);
     const total = roll + mod;
-    const rollResult = `🎲 ${rollPrompt.ability} check${rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ''}: Rolled ${roll} + ${mod} = ${total}`;
+    //const rollResult = `🎲 ${rollPrompt.ability} check${rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ''}: Rolled ${roll} + ${mod} = ${total}`;
     const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.\nThis was in response to my question: "${lastPlayerQuestion}" and the DM's prompt: "${lastRollContext}"`;
     sendMessage(playerMsg);
   };
