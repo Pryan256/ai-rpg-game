@@ -141,6 +141,11 @@ button:hover {
   scroll-behavior: smooth;
 }
 
+.chat-box-inner {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
 .chat-box .ai,
 .chat-box .player {
   margin-bottom: 1rem;

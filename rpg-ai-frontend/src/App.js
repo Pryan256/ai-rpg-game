@@ -272,16 +272,17 @@ function App() {
             )}
 
             <div className="chat-box">
-              {messages.map((msg, i) => (
-                <div key={i} className={msg.sender}>
-                  <strong>{msg.sender === 'ai' ? 'DM' : playerName}:</strong>{' '}
-                  <span
-                    dangerouslySetInnerHTML={{
-                      __html: msg.sender === 'ai' ? highlightText(msg.text, highlights) : msg.text
-                    }}
-                  />
-                </div>
-              ))}
+              <div className="chat-box-inner">
+                {messages.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={msg.role === 'player' ? 'player' : 'ai'}
+                  >
+                    <strong>{msg.role === 'player' ? playerName : 'DM'}:</strong>{' '}
+                    {msg.text}
+                  </div>
+                ))}
+              </div>
             </div>
 
             <form onSubmit={(e) => { e.preventDefault(); sendMessage(input); }} className="floating-input">
