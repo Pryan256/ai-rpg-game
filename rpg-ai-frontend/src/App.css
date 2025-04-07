@@ -16,6 +16,38 @@ html, body, #root, .App {
   overflow: hidden;
 }
 
+h1 {
+  color: #6b4b2d;
+  margin-bottom: 2rem;
+}
+
+input {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  background: #6b4b2d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 0.5rem;
+  white-space: nowrap;
+  width: auto;
+  max-width: none;
+}
+
+button:hover {
+  background: #593a21;
+}
+
 /* === 📀 Grid Layout === */
 .main-grid {
   display: grid;
@@ -89,7 +121,6 @@ html, body, #root, .App {
   height: 100%;
   width: 100%;
   box-sizing: border-box;
-  padding-bottom: 1.5rem;
   overflow: hidden;
   flex-grow: 1;
 }
@@ -99,13 +130,12 @@ html, body, #root, .App {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  padding: 1.5rem 1rem 8rem;
+  align-items: stretch;
+  padding: 1.5rem 1rem 10rem;
   text-align: left;
   font-size: 1.05rem;
   line-height: 1.6;
   min-height: 0;
-  max-height: 100%;
   scroll-behavior: smooth;
   overscroll-behavior: contain;
 }
@@ -114,6 +144,8 @@ html, body, #root, .App {
   max-width: 800px;
   margin: 0 auto;
   width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .chat-box .ai,
@@ -185,7 +217,7 @@ html, body, #root, .App {
 }
 
 /* === 🧠 DM Thinking === */
-.dm-thinking {
+dm-thinking {
   font-style: italic;
   color: #6b4b2d;
   font-size: 1.05rem;
