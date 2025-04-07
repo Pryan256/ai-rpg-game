@@ -177,7 +177,11 @@ function App() {
 
   const sendMessage = async (msg = input) => {
     if (!msg.trim()) return;
-    setMessages((prev) => [...prev, { sender: 'player', text: msg }]);
+    setMessages((prev) => [
+      ...prev,
+      { sender: 'player', text: msg },
+      { sender: 'ai', text: '' } // prep next response placeholder
+    ]);    
     setInput('');
     setOptions([]);
     setRollPrompt(null);
