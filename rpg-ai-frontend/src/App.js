@@ -1,3 +1,5 @@
+// Refactored App.js to match ChatGPT message handling behavior
+
 import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 import { v4 as uuidv4 } from 'uuid';
@@ -23,7 +25,8 @@ function App() {
   const [playerName, setPlayerName] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [input, setInput] = useState('');
-  const [turns, setTurns] = useState([]); // <-- new
+  const [history, setHistory] = useState([]); // complete previous turns
+  const [currentTurn, setCurrentTurn] = useState(null); // active turn (player + streaming DM)
   const [options, setOptions] = useState([]);
   const [showActions, setShowActions] = useState(false);
   const [rollPrompt, setRollPrompt] = useState(null);
@@ -44,7 +47,7 @@ function App() {
 
   useEffect(() => {
     if (chatRef.current) chatRef.current.scrollTop = chatRef.current.scrollHeight;
-  }, [turns]);
+  }, [history, currentTurn]);
 
   const statModifier = (score) => Math.floor((score - 10) / 2);
 
@@ -98,15 +101,12 @@ function App() {
   const streamMessage = async (text, onDone = () => {}) => {
     const words = text.split(' ');
     let accumulated = '';
-    setTurns(prev => [...prev.slice(0, -1), { ...prev[prev.length - 1], dm: '' }]);
+    setCurrentTurn(prev => ({ ...prev, dm: '' }));
+
     words.forEach((word, i) => {
       setTimeout(() => {
         accumulated += word + ' ';
-        setTurns(prev => {
-          const updated = [...prev];
-          updated[updated.length - 1].dm = accumulated;
-          return updated;
-        });
+        setCurrentTurn(prev => ({ ...prev, dm: accumulated }));
         if (i === words.length - 1) {
           onDone();
           setLoadingDM(false);
@@ -121,8 +121,8 @@ function App() {
     setOptions([]);
     setRollPrompt(null);
     setLastPlayerQuestion(msg);
-    setTurns(prev => [...prev, { player: msg, dm: '' }]);
     setLoadingDM(true);
+    setCurrentTurn({ player: msg, dm: '' });
 
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
@@ -133,7 +133,11 @@ function App() {
       const data = await res.json();
       detectRollRequest(data.response);
       extractMemory(data.response);
-      await streamMessage(data.response, () => setOptions(data.options || []));
+      await streamMessage(data.response, () => {
+        setOptions(data.options || []);
+        setHistory(prev => [...prev, { player: msg, dm: data.response }]);
+        setCurrentTurn(null);
+      });
     } catch (err) {
       console.error(err);
     }
@@ -179,19 +183,11 @@ function App() {
     const total = roll + mod;
     const rollResult = `🎲 ${rollPrompt.ability} check${rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ''}: Rolled ${roll} + ${mod} = ${total}`;
     const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.\nThis was in response to my question: "${lastPlayerQuestion}" and the DM's prompt: "${lastRollContext}"`;
-    setTurns(prev => [...prev, { player: rollResult, dm: '' }]);
     sendMessage(playerMsg);
   };
 
   return (
     <div className="App">
-      <header className="top-nav">
-  <div className="nav-content">
-    <span className="logo">🧙 AI Dungeon Master</span>
-    {/* Future nav links can go here */}
-  </div>
-</header>
-
       {!submitted ? (
         <form onSubmit={handleNameSubmit} className="name-form">
           <input type="text" placeholder="Enter your character name..." value={playerName} onChange={(e) => setPlayerName(e.target.value)} />
@@ -199,51 +195,28 @@ function App() {
         </form>
       ) : (
         <div className="main-grid">
-          <div className="column character-sheet">
-            <h2>{playerName}</h2>
-            <p><strong>Race:</strong> {character.race}</p>
-            <p><strong>Class:</strong> {character.class}</p>
-            <p><strong>Level:</strong> {character.level}</p>
-            <p><strong>HP:</strong> {character.hp}</p>
-            <h3>Stats</h3>
-            <ul>
-              {Object.entries(character.stats).map(([stat, value]) => (
-                <li key={stat}>{stat}: {value}</li>
-              ))}
-            </ul>
-            <h3>Inventory</h3>
-            <ul>
-              {character.inventory.map((item, i) => <li key={i}>{item}</li>)}
-            </ul>
-          </div>
-
           <div className="column game-area">
-            {loadingDM && (
-              <div className="dm-thinking">
-                <span>🧙‍♂️ The Dungeon Master is thinking</span>
-                <span className="dots">
-                  <span>.</span><span>.</span><span>.</span>
-                </span>
+            <div className="chat-box" ref={chatRef}>
+              <div className="chat-box-inner">
+                {history.map((turn, i) => (
+                  <div key={i} className="chat-turn">
+                    <div className="player"><strong>{playerName}:</strong> {turn.player}</div>
+                    <div className="ai"><strong>DM:</strong> <span dangerouslySetInnerHTML={{ __html: highlightText(turn.dm, highlights) }} /></div>
+                  </div>
+                ))}
+
+                {currentTurn && (
+                  <div className="chat-turn current">
+                    <div className="player"><strong>{playerName}:</strong> {currentTurn.player}</div>
+                    <div className="ai"><strong>DM:</strong> <span dangerouslySetInnerHTML={{ __html: highlightText(currentTurn.dm, highlights) }} /></div>
+                  </div>
+                )}
               </div>
-            )}
-
-          <div className="chat-box" ref={chatRef}>
-            <div className="chat-box-inner">
-              {turns.map((turn, i) => (
-                <div key={i} className="chat-turn">
-                  <div className="player"><strong>{playerName}:</strong> {turn.player}</div>
-                  <div className="ai"><strong>DM:</strong> <span dangerouslySetInnerHTML={{ __html: highlightText(turn.dm, highlights) }} /></div>
-                </div>
-              ))}
             </div>
-           </div>
-
 
             <form onSubmit={(e) => { e.preventDefault(); sendMessage(input); }} className="floating-input">
               <input type="text" placeholder="Ask a question..." value={input} onChange={(e) => setInput(e.target.value)} />
-              <button type="button" onClick={() => setShowActions(prev => !prev)}>
-                ⚔️ Actions
-              </button>
+              <button type="button" onClick={() => setShowActions(prev => !prev)}>⚔️ Actions</button>
               {showActions && (
                 <div className="popup-actions">
                   {options.map((option, i) => (
@@ -256,11 +229,7 @@ function App() {
 
             {rollPrompt && (
               <div className="roll-section">
-                {lastRollContext && (
-                  <p className="roll-context">
-                    🧠 Rolling for: <em>{lastRollContext}</em>
-                  </p>
-                )}
+                {lastRollContext && <p className="roll-context">🧠 Rolling for: <em>{lastRollContext}</em></p>}
                 <button onClick={handleRollCheck}>
                   🎲 Roll {rollPrompt.ability} Check{rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ''}
                 </button>
