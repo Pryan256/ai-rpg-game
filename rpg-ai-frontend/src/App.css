@@ -52,13 +52,13 @@ button:hover {
 /* === 📀 Grid Layout === */
 .main-grid {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr) 260px;
+  grid-template-columns: 260px 1fr 260px;
   gap: 2rem;
-  max-width: 100%;
-  margin: 0 auto;
-  height: calc(100vh - 4rem); /* Full height minus header */
-  overflow: hidden; /* Prevent main scroll */
+  width: 100vw;
+  height: calc(100vh - 4rem);
+  overflow: hidden;
 }
+
 
 /* === 🧙 Character Sheet === */
 .character-sheet {
@@ -122,8 +122,6 @@ button:hover {
   flex-direction: column;
   height: 100%;
   width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
   box-sizing: border-box;
   padding-bottom: 1.5rem;
   overflow-y: auto;
@@ -139,6 +137,8 @@ button:hover {
   line-height: 1.6;
   min-height: 0;
   max-height: 100%;
+  padding-bottom: 6rem; /* space for input box */
+  scroll-behavior: smooth;
 }
 
 .chat-box .ai,

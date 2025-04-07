@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect  } from 'react';
 import './App.css';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -47,6 +47,14 @@ function App() {
     localStorage.setItem('sessionId', newId);
     return newId;
   });
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const box = document.querySelector('.chat-box');
+      if (box) box.scrollTop = box.scrollHeight;
+    }, 50);
+    return () => clearTimeout(timeout);
+  }, [messages]);
 
   const statModifier = (statScore) => Math.floor((statScore - 10) / 2);
 
