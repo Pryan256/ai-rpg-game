@@ -48,14 +48,15 @@ function App() {
     return newId;
   });
 
+
   const chatRef = useRef();
 
-  useEffect(() => {
+  const scrollToBottom = () => {
     const el = chatRef.current;
     if (el) {
-      el.scrollTop = el.scrollHeight; // ✅ scrolls to bottom like ChatGPT
+      el.scrollTop = el.scrollHeight;
     }
-  }, [messages]);
+  };
   
 
   const statModifier = (statScore) => Math.floor((statScore - 10) / 2);
@@ -136,6 +137,7 @@ function App() {
           return updated;
         });
         if (index === words.length - 1) {
+          scrollToBottom(); 
           onDone();
           setLoadingDM(false);
         }
