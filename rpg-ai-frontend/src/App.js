@@ -137,7 +137,6 @@ function App() {
           return updated;
         });
         if (index === words.length - 1) {
-          scrollToBottom(); 
           onDone();
           setLoadingDM(false);
         }
@@ -176,10 +175,11 @@ function App() {
 
   const sendMessage = async (msg = input) => {
     if (!msg.trim()) return;
-    setMessages((prev) => [
-  ...prev,
-  { sender: 'player', text: msg },
-]);
+    setMessages((prev) => {
+      const updated = [...prev, { sender: 'player', text: msg }];
+      setTimeout(scrollToBottom, 0); // 👈 scrolls immediately after render
+      return updated;
+    });
 
     setInput('');
     setOptions([]);
