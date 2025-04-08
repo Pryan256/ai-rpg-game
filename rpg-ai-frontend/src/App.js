@@ -53,7 +53,7 @@ function App() {
   useEffect(() => {
     const el = chatRef.current;
     if (el) {
-      el.scrollTop = 0; // top = newest in column-reverse mode
+      el.scrollTop = el.scrollHeight; // ✅ scrolls to bottom like ChatGPT
     }
   }, [messages]);
   
@@ -177,7 +177,6 @@ function App() {
     setMessages((prev) => [
   ...prev,
   { sender: 'player', text: msg },
-  { sender: 'ai', text: '' } // prep next response placeholder
 ]);
 
     setInput('');
