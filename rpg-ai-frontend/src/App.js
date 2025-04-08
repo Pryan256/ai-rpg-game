@@ -52,14 +52,11 @@ function App() {
 
   useEffect(() => {
     const el = chatRef.current;
-    if (!el) return;
-
-    const isAtBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 50;
-
-    if (isAtBottom) {
-      el.scrollTop = el.scrollHeight;
+    if (el) {
+      el.scrollTop = 0; // top = newest in column-reverse mode
     }
   }, [messages]);
+  
 
   const statModifier = (statScore) => Math.floor((statScore - 10) / 2);
 

@@ -129,8 +129,7 @@ button:hover {
   flex-grow: 1;
   overflow-y: auto;
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
+  flex-direction: column-reverse; /* important */
   padding: 1.5rem 1rem 12rem;
   text-align: left;
   font-size: 1.05rem;
@@ -139,6 +138,7 @@ button:hover {
   scroll-behavior: smooth;
   overscroll-behavior: contain;
 }
+
 
 .chat-box-inner {
   max-width: 800px;
