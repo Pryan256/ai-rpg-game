@@ -354,23 +354,25 @@ function App() {
                       {option}
                     </button>
                   ))}
+
+                  {rollPrompt && (
+                    <>
+                      {lastRollContext && (
+                        <p className="roll-context" style={{ marginTop: "0.5rem", fontStyle: "italic" }}>
+                          🧠 Rolling for: <em>{lastRollContext}</em>
+                        </p>
+                      )}
+                      <button onClick={handleRollCheck}>
+                        🎲 Roll {rollPrompt.ability} Check{rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ""}
+                      </button>
+                    </>
+                  )}
+
                   <button onClick={clearMemory}>🧼 Clear Memory</button>
                 </div>
               )}
-            </form>
 
-            {rollPrompt && (
-              <div className="roll-section">
-                {lastRollContext && (
-                  <p className="roll-context">
-                    🧠 Rolling for: <em>{lastRollContext}</em>
-                  </p>
-                )}
-                <button onClick={handleRollCheck}>
-                  🎲 Roll {rollPrompt.ability} Check{rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ""}
-                </button>
-              </div>
-            )}
+            </form>
           </div>
 
           <div className="column memory-sidebar">
