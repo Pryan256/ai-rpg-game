@@ -149,7 +149,7 @@ button:hover {
   display: flex;
   flex-direction: column;
   min-height: 100%; /* Ensure it takes full height */
-  justify-content: flex-end; /* Push content to the bottom */
+  justify-content: flex-start; /* Push content to the bottom */
 }
 
 .chat-box .ai,
