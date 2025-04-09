@@ -55,9 +55,12 @@ function App() {
   const scrollToBottom = () => {
     const el = chatRef.current
     if (el) {
-      el.scrollTop = el.scrollHeight
+      requestAnimationFrame(() => {
+        el.scrollTop = el.scrollHeight
+      })
     }
   }
+  
 
   const statModifier = (statScore) => Math.floor((statScore - 10) / 2)
 
