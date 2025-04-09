@@ -129,10 +129,10 @@ function App() {
     const words = text.split(" ")
     let accumulated = ""
     setMessages((prev) => {
-      const updated = [...prev, { sender: "ai", text: "" }]
+      const updated = [...prev, { sender: "ai", text: "🧙‍♂️ The Dungeon Master is thinking..." }]
       setTimeout(scrollToBottom, 10)
       return updated
-    })
+    })    
 
     words.forEach((word, index) => {
       setTimeout(() => {
@@ -305,17 +305,6 @@ function App() {
           </div>
 
           <div className="column game-area">
-            {loadingDM && (
-              <div className="dm-thinking">
-                <span>🧙‍♂️ The Dungeon Master is thinking</span>
-                <span className="dots">
-                  <span>.</span>
-                  <span>.</span>
-                  <span>.</span>
-                </span>
-              </div>
-            )}
-
             <div className="chat-box" ref={chatRef}>
               <div className="chat-box-inner">
                 {messages.map((msg, i) => (
