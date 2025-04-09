@@ -55,7 +55,7 @@ function App() {
   const scrollToBottom = () => {
     const el = chatRef.current
     if (el) {
-      el.scrollTop = 0 // Changed from el.scrollHeight to 0 for reversed layout
+      el.scrollTop = el.scrollHeight
     }
   }
 
@@ -315,20 +315,16 @@ function App() {
 
             <div className="chat-box" ref={chatRef}>
               <div className="chat-box-inner">
-                <div className="chat-spacer"></div>
-                {messages
-                  .slice()
-                  .reverse()
-                  .map((msg, i) => (
-                    <div key={i} className={msg.sender}>
-                      <strong>{msg.sender === "ai" ? "DM" : playerName}:</strong>{" "}
-                      <span
-                        dangerouslySetInnerHTML={{
-                          __html: msg.sender === "ai" ? highlightText(msg.text, highlights) : msg.text,
-                        }}
-                      />
-                    </div>
-                  ))}
+                {messages.map((msg, i) => (
+                  <div key={i} className={msg.sender}>
+                    <strong>{msg.sender === "ai" ? "DM" : playerName}:</strong>{" "}
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: msg.sender === "ai" ? highlightText(msg.text, highlights) : msg.text,
+                      }}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
 

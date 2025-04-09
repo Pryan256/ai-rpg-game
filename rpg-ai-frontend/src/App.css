@@ -132,7 +132,7 @@ button:hover {
   flex-grow: 1;
   overflow-y: auto;
   display: flex;
-  flex-direction: column-reverse; /* Changed from column to column-reverse */
+  flex-direction: column; /* Keep as column */
   padding: 1.5rem 1rem 12rem;
   text-align: left;
   font-size: 1.05rem;
@@ -147,7 +147,9 @@ button:hover {
   margin: 0 auto;
   width: 100%;
   display: flex;
-  flex-direction: column; /* Keep this as column */
+  flex-direction: column;
+  min-height: 100%; /* Ensure it takes full height */
+  justify-content: flex-end; /* Push content to the bottom */
 }
 
 .chat-box .ai,
@@ -313,8 +315,4 @@ dm-thinking {
   100% {
     opacity: 0.2;
   }
-}
-
-.chat-spacer {
-  flex-grow: 1;
 }
