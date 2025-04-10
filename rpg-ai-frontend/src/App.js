@@ -178,7 +178,7 @@ function App() {
     setMessages((prev) => [
       ...prev,
       { sender: "player", text: msg },
-      { sender: "ai", text: "" } // AI thinking placeholder
+      { sender: "ai", text: "🧙‍♂️ The Dungeon Master is thinking..." } // AI thinking placeholder
     ])
     scrollToBottom()
     try {
