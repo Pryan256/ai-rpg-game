@@ -147,6 +147,8 @@ function App() {
     if (!playerName.trim()) return
     setSubmitted(true)
     character.name = playerName
+    setMessages([{ sender: "ai", text: "" }]) // placeholder for first DM message
+    scrollToBottom()
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
         method: "POST",
