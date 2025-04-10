@@ -185,7 +185,7 @@ function App() {
     setRollPrompt(null)
     setLastPlayerQuestion(msg)
   
-    // Add player message + placeholder AI thinking message
+    // Add player + placeholder DM thinking message
     setMessages((prev) => [
       ...prev,
       { sender: "player", text: msg },
@@ -212,9 +212,13 @@ function App() {
       })
     } catch (err) {
       console.error("Error:", err)
-      setMessages((prev) => [...prev, { sender: "ai", text: "⚠️ Something went wrong talking to the Dungeon Master." }])
+      setMessages((prev) => [
+        ...prev,
+        { sender: "ai", text: "⚠️ Something went wrong talking to the Dungeon Master." }
+      ])
     }
   }
+  
   
 
   const handleOptionClick = (option) => {
