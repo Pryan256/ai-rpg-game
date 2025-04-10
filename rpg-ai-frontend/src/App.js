@@ -147,7 +147,7 @@ function App() {
     if (!playerName.trim()) return
     setSubmitted(true)
     character.name = playerName
-    setMessages([{ sender: "ai", text: "🧙‍♂️ The Dungeon Master is thinking..." }]) // placeholder for first DM message
+    setMessages([{ sender: "ai", text: '<span class="thinking">🧙‍♂️ The Dungeon Master is thinking<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>' }]) // placeholder for first DM message
     scrollToBottom()
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
@@ -178,7 +178,7 @@ function App() {
     setMessages((prev) => [
       ...prev,
       { sender: "player", text: msg },
-      { sender: "ai", text: "🧙‍♂️ The Dungeon Master is thinking..." } // AI thinking placeholder
+      { sender: "ai", text: '<span class="thinking">🧙‍♂️ The Dungeon Master is thinking<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>' } // AI thinking placeholder
     ])
     scrollToBottom()
     try {
