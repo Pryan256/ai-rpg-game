@@ -309,7 +309,7 @@ function App() {
             <div className="chat-box" ref={chatRef}>
               <div className="chat-box-inner">
               {messages.map((msg, i) => {
-                if (!msg || !msg.sender || !msg.text) return null
+                if (!msg || !msg.sender || typeof msg.text !== "string") return null
                 return (
                   <div key={i} className={msg.sender}>
                     <strong>{msg.sender === "ai" ? "DM" : playerName}:</strong>{" "}
