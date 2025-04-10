@@ -169,18 +169,20 @@ function App() {
     }
   }
 
-  const sendMessage = async (msg = input) => {
+  const sendMessage = async (msg = input, silent = false) => {
     if (!msg.trim()) return
     setInput("")
     setOptions([])
     setRollPrompt(null)
     setLastPlayerQuestion(msg)
-    setMessages((prev) => [
-      ...prev,
-      { sender: "player", text: msg },
-      { sender: "ai", text: '<span class="thinking">🧙‍♂️ The Dungeon Master is thinking<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>' } // AI thinking placeholder
-    ])
-    scrollToBottom()
+    if (!silent) {
+      setMessages((prev) => [
+        ...prev,
+        { sender: "player", text: msg },
+        { sender: "ai", text: '<span class="thinking">🧙‍♂️ The Dungeon Master is thinking<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>' } // AI thinking placeholder
+      ])
+      scrollToBottom()
+    }
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
         method: "POST",
@@ -234,7 +236,7 @@ function App() {
     const rollResult = `🎲 ${rollPrompt.ability} check${rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ""}: Rolled ${roll} + ${mod} = ${total}`
     const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.\nThis was in response to my question: "${lastPlayerQuestion}" and the DM's prompt: "${lastRollContext}"`
     setMessages((prev) => [...prev, { sender: "player", text: rollResult }])
-    sendMessage(playerMsg)
+    sendMessage(playerMsg, true)
     setRollPrompt(null)
     setLastRollContext("")
   }
