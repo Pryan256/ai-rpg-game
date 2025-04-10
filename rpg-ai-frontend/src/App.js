@@ -40,7 +40,7 @@ function App() {
     knownLaws: [],
   })
   const [highlights, setHighlights] = useState([])
-  const [loadingDM, setLoadingDM] = useState(false)
+  //const [loadingDM, setLoadingDM] = useState(false)
 
   const [sessionId] = useState(() => {
     const stored = localStorage.getItem("sessionId")
