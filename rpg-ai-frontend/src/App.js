@@ -128,14 +128,7 @@ function App() {
     const words = text.split(" ")
     let accumulated = ""
   
-    // Add "thinking" message
-    setMessages((prev) => [
-      ...prev,
-      { sender: "ai", text: "🧙‍♂️ The Dungeon Master is thinking..." }
-    ])
-    scrollToBottom()
-  
-    // Wait a frame before streaming begins
+    // Wait a tick so the placeholder renders first
     await new Promise((resolve) => setTimeout(resolve, 50))
   
     words.forEach((word, index) => {
@@ -154,6 +147,7 @@ function App() {
       }, index * 40)
     })
   }
+  
   
 
   const handleNameSubmit = async (e) => {
@@ -185,18 +179,20 @@ function App() {
 
   const sendMessage = async (msg = input) => {
     if (!msg.trim()) return
-    setMessages((prev) => {
-      const updated = [...prev, { sender: "player", text: msg }]
-      setTimeout(scrollToBottom, 10) // Increased timeout slightly
-      return updated
-    })
-
+  
     setInput("")
     setOptions([])
     setRollPrompt(null)
-
     setLastPlayerQuestion(msg)
-
+  
+    // Add player message + placeholder AI thinking message
+    setMessages((prev) => [
+      ...prev,
+      { sender: "player", text: msg },
+      { sender: "ai", text: "🧙‍♂️ The Dungeon Master is thinking..." }
+    ])
+    scrollToBottom()
+  
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
         method: "POST",
@@ -206,19 +202,20 @@ function App() {
       const data = await res.json()
       const storyPart = data.response
       const choices = data.options || []
-
+  
       detectRollRequest(storyPart)
       extractMemory(storyPart)
       await streamMessage(storyPart, () => {
         setOptions(choices)
         setShowActions(false)
-        setTimeout(scrollToBottom, 50) // Added scroll after AI response completes
+        setTimeout(scrollToBottom, 50)
       })
     } catch (err) {
       console.error("Error:", err)
       setMessages((prev) => [...prev, { sender: "ai", text: "⚠️ Something went wrong talking to the Dungeon Master." }])
     }
   }
+  
 
   const handleOptionClick = (option) => {
     setInput(option)
