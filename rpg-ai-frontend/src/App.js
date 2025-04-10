@@ -29,7 +29,6 @@ function App() {
   const [options, setOptions] = useState([])
   const [showActions, setShowActions] = useState(false)
   const [rollPrompt, setRollPrompt] = useState(null)
-
   const [lastRollContext, setLastRollContext] = useState("")
   const [lastPlayerQuestion, setLastPlayerQuestion] = useState("")
   const [memory, setMemory] = useState({
@@ -50,7 +49,6 @@ function App() {
   })
 
   const chatRef = useRef()
-
   const scrollToBottom = () => {
     const el = chatRef.current
     if (el) {
@@ -59,7 +57,6 @@ function App() {
       })
     }
   }
-  
 
   const statModifier = (statScore) => Math.floor((statScore - 10) / 2)
 
@@ -127,17 +124,14 @@ function App() {
   const streamMessage = async (text, onDone = () => {}) => {
     const words = text.split(" ")
     let accumulated = ""
-  
-    // Wait a tick so the placeholder renders first
     await new Promise((resolve) => setTimeout(resolve, 50))
-  
     words.forEach((word, index) => {
       setTimeout(() => {
         accumulated += word + " "
         setMessages((prev) => {
           const updated = [...prev]
           const last = updated[updated.length - 1]
-          if (last.sender === "ai") last.text = accumulated
+          if (last && last.sender === "ai") last.text = accumulated
           return updated
         })
         if (index === words.length - 1) {
@@ -147,15 +141,12 @@ function App() {
       }, index * 40)
     })
   }
-  
-  
 
   const handleNameSubmit = async (e) => {
     e.preventDefault()
     if (!playerName.trim()) return
     setSubmitted(true)
     character.name = playerName
-
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
         method: "POST",
@@ -165,7 +156,6 @@ function App() {
       const data = await res.json()
       const storyPart = data.response
       const choices = data.options || []
-
       detectRollRequest(storyPart)
       extractMemory(storyPart)
       await streamMessage(storyPart, () => {
@@ -179,20 +169,16 @@ function App() {
 
   const sendMessage = async (msg = input) => {
     if (!msg.trim()) return
-  
     setInput("")
     setOptions([])
     setRollPrompt(null)
     setLastPlayerQuestion(msg)
-  
-    // Add player + placeholder DM thinking message
     setMessages((prev) => [
       ...prev,
       { sender: "player", text: msg },
-      { sender: "ai", text: "🧙‍♂️ The Dungeon Master is thinking..." }
+      { sender: "ai", text: "" } // AI thinking placeholder
     ])
     scrollToBottom()
-  
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
         method: "POST",
@@ -202,7 +188,6 @@ function App() {
       const data = await res.json()
       const storyPart = data.response
       const choices = data.options || []
-  
       detectRollRequest(storyPart)
       extractMemory(storyPart)
       await streamMessage(storyPart, () => {
@@ -218,8 +203,6 @@ function App() {
       ])
     }
   }
-  
-  
 
   const handleOptionClick = (option) => {
     setInput(option)
@@ -259,7 +242,6 @@ function App() {
       <header className="top-nav">
         <div className="nav-content">
           <span className="logo">🧙 AI Dungeon Master</span>
-          {/* Future nav links can go here */}
         </div>
       </header>
 
@@ -277,24 +259,14 @@ function App() {
         <div className="main-grid">
           <div className="column character-sheet">
             <h2>{playerName}</h2>
-            <p>
-              <strong>Race:</strong> {character.race}
-            </p>
-            <p>
-              <strong>Class:</strong> {character.class}
-            </p>
-            <p>
-              <strong>Level:</strong> {character.level}
-            </p>
-            <p>
-              <strong>HP:</strong> {character.hp}
-            </p>
+            <p><strong>Race:</strong> {character.race}</p>
+            <p><strong>Class:</strong> {character.class}</p>
+            <p><strong>Level:</strong> {character.level}</p>
+            <p><strong>HP:</strong> {character.hp}</p>
             <h3>Stats</h3>
             <ul>
               {Object.entries(character.stats).map(([stat, value]) => (
-                <li key={stat}>
-                  {stat}: {value}
-                </li>
+                <li key={stat}>{stat}: {value}</li>
               ))}
             </ul>
             <h3>Inventory</h3>
@@ -308,20 +280,19 @@ function App() {
           <div className="column game-area">
             <div className="chat-box" ref={chatRef}>
               <div className="chat-box-inner">
-              {messages.map((msg, i) => {
-                if (!msg || !msg.sender || typeof msg.text !== "string") return null
-                return (
-                  <div key={i} className={msg.sender}>
-                    <strong>{msg.sender === "ai" ? "DM" : playerName}:</strong>{" "}
-                    <span
-                      dangerouslySetInnerHTML={{
-                        __html: msg.sender === "ai" ? highlightText(msg.text, highlights) : msg.text,
-                      }}
-                    />
-                  </div>
-                )
-              })}
-
+                {messages.map((msg, i) => {
+                  if (!msg || !msg.sender || typeof msg.text !== "string") return null
+                  return (
+                    <div key={i} className={msg.sender}>
+                      <strong>{msg.sender === "ai" ? "DM" : playerName}:</strong>{" "}
+                      <span
+                        dangerouslySetInnerHTML={{
+                          __html: msg.sender === "ai" ? highlightText(msg.text, highlights) : msg.text,
+                        }}
+                      />
+                    </div>
+                  )
+                })}
               </div>
             </div>
 
@@ -365,27 +336,16 @@ function App() {
                   <button onClick={clearMemory}>🧼 Clear Memory</button>
                 </div>
               )}
-
             </form>
           </div>
 
           <div className="column memory-sidebar">
             <h2>📖 World Memory</h2>
-            <p>
-              <strong>🎯 Quest:</strong> {memory.quest || "None yet"}
-            </p>
-            <p>
-              <strong>🎒 Items:</strong> {memory.knownItems.join(", ") || "None"}
-            </p>
-            <p>
-              <strong>🧑‍🤝‍🧑 Characters:</strong> {memory.knownCharacters.join(", ") || "None"}
-            </p>
-            <p>
-              <strong>🗺 Locations:</strong> {memory.knownLocations.join(", ") || "None"}
-            </p>
-            <p>
-              <strong>📜 Laws:</strong> {memory.knownLaws.join(", ") || "None"}
-            </p>
+            <p><strong>🎯 Quest:</strong> {memory.quest || "None yet"}</p>
+            <p><strong>🎒 Items:</strong> {memory.knownItems.join(", ") || "None"}</p>
+            <p><strong>🧑‍🤝‍🧑 Characters:</strong> {memory.knownCharacters.join(", ") || "None"}</p>
+            <p><strong>🗺 Locations:</strong> {memory.knownLocations.join(", ") || "None"}</p>
+            <p><strong>📜 Laws:</strong> {memory.knownLaws.join(", ") || "None"}</p>
           </div>
         </div>
       )}
