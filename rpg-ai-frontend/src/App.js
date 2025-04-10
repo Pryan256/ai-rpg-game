@@ -127,16 +127,17 @@ function App() {
   const streamMessage = async (text, onDone = () => {}) => {
     const words = text.split(" ")
     let accumulated = ""
-    setMessages((prev) => {
-      const updated = [
-        ...prev,
-        { sender: "ai", text: "🧙‍♂️ The Dungeon Master is thinking..." }
-      ]
-      setTimeout(scrollToBottom, 10)
-      return updated
-    })
-    
-
+  
+    // Add "thinking" message
+    setMessages((prev) => [
+      ...prev,
+      { sender: "ai", text: "🧙‍♂️ The Dungeon Master is thinking..." }
+    ])
+    scrollToBottom()
+  
+    // Wait a frame before streaming begins
+    await new Promise((resolve) => setTimeout(resolve, 50))
+  
     words.forEach((word, index) => {
       setTimeout(() => {
         accumulated += word + " "
@@ -148,11 +149,12 @@ function App() {
         })
         if (index === words.length - 1) {
           onDone()
-          setTimeout(scrollToBottom, 50)
+          scrollToBottom()
         }
       }, index * 40)
     })
   }
+  
 
   const handleNameSubmit = async (e) => {
     e.preventDefault()
