@@ -128,10 +128,15 @@ function App() {
     const words = text.split(" ")
     let accumulated = ""
     setMessages((prev) => {
-      const updated = [...prev, { sender: "ai", text: "🧙‍♂️ The Dungeon Master is thinking..." }]
+      const updated = [
+        ...prev,
+        { sender: "player", text: msg },
+        { sender: "ai", text: "🧙‍♂️ The Dungeon Master is thinking..." }
+      ]
       setTimeout(scrollToBottom, 10)
       return updated
-    })    
+    })
+    
 
     words.forEach((word, index) => {
       setTimeout(() => {
