@@ -40,7 +40,6 @@ function App() {
     knownLaws: [],
   })
   const [highlights, setHighlights] = useState([])
-  //const [loadingDM, setLoadingDM] = useState(false)
 
   const [sessionId] = useState(() => {
     const stored = localStorage.getItem("sessionId")
@@ -145,7 +144,6 @@ function App() {
         })
         if (index === words.length - 1) {
           onDone()
-          setLoadingDM(false)
           setTimeout(scrollToBottom, 50)
         }
       }, index * 40)
@@ -157,7 +155,6 @@ function App() {
     if (!playerName.trim()) return
     setSubmitted(true)
     character.name = playerName
-    setLoadingDM(true)
 
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
@@ -177,7 +174,6 @@ function App() {
     } catch (err) {
       console.error("Error:", err)
       setMessages([{ sender: "ai", text: "⚠️ Something went wrong getting your greeting." }])
-      setLoadingDM(false)
     }
   }
 
@@ -194,7 +190,6 @@ function App() {
     setRollPrompt(null)
 
     setLastPlayerQuestion(msg)
-    setLoadingDM(true)
 
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
@@ -216,7 +211,6 @@ function App() {
     } catch (err) {
       console.error("Error:", err)
       setMessages((prev) => [...prev, { sender: "ai", text: "⚠️ Something went wrong talking to the Dungeon Master." }])
-      setLoadingDM(false)
     }
   }
 
