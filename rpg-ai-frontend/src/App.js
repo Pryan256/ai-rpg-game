@@ -142,33 +142,6 @@ function App() {
     })
   }
 
-  const handleNameSubmit = async (e) => {
-    e.preventDefault()
-    if (!playerName.trim()) return
-    setSubmitted(true)
-    character.name = playerName
-    setMessages([{ sender: "ai", text: '<span class="thinking">🧙‍♂️ The Dungeon Master is thinking<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>' }]) // placeholder for first DM message
-    scrollToBottom()
-    try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: playerName, message: "start", sessionId }),
-      })
-      const data = await res.json()
-      const storyPart = data.response
-      const choices = data.options || []
-      detectRollRequest(storyPart)
-      extractMemory(storyPart)
-      await streamMessage(storyPart, () => {
-        setOptions(choices)
-      })
-    } catch (err) {
-      console.error("Error:", err)
-      setMessages([{ sender: "ai", text: "⚠️ Something went wrong getting your greeting." }])
-    }
-  }
-
   const sendMessage = async (msg = input, silent = false) => {
     if (!msg.trim()) return
     setInput("")
@@ -179,7 +152,7 @@ function App() {
       setMessages((prev) => [
         ...prev,
         { sender: "player", text: msg },
-        { sender: "ai", text: '<span class="thinking">🧙‍♂️ The Dungeon Master is thinking<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>' } // AI thinking placeholder
+        { sender: "ai", text: '<span class="thinking">🧙‍♂️ The Dungeon Master is thinking<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>' }
       ])
       scrollToBottom()
     }
@@ -205,6 +178,33 @@ function App() {
         ...prev,
         { sender: "ai", text: "⚠️ Something went wrong talking to the Dungeon Master." }
       ])
+    }
+  }
+
+  const handleNameSubmit = async (e) => {
+    e.preventDefault()
+    if (!playerName.trim()) return
+    setSubmitted(true)
+    character.name = playerName
+    setMessages([{ sender: "ai", text: '<span class="thinking">🧙‍♂️ The Dungeon Master is thinking<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>' }])
+    scrollToBottom()
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: playerName, message: "start", sessionId }),
+      })
+      const data = await res.json()
+      const storyPart = data.response
+      const choices = data.options || []
+      detectRollRequest(storyPart)
+      extractMemory(storyPart)
+      await streamMessage(storyPart, () => {
+        setOptions(choices)
+      })
+    } catch (err) {
+      console.error("Error:", err)
+      setMessages([{ sender: "ai", text: "⚠️ Something went wrong getting your greeting." }])
     }
   }
 
@@ -234,7 +234,7 @@ function App() {
     const mod = statModifier(character.stats[statKey])
     const total = roll + mod
     const rollResult = `🎲 ${rollPrompt.ability} check${rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ""}: Rolled ${roll} + ${mod} = ${total}`
-    const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.\nThis was in response to my question: "${lastPlayerQuestion}" and the DM's prompt: "${lastRollContext}"`
+    const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.\nThis was in response to my question: \"${lastPlayerQuestion}\" and the DM's prompt: \"${lastRollContext}\"`
     setMessages((prev) => [...prev, { sender: "player", text: rollResult }])
     sendMessage(playerMsg, true)
     setRollPrompt(null)
