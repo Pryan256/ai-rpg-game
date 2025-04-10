@@ -304,7 +304,9 @@ function App() {
           <div className="column game-area">
             <div className="chat-box" ref={chatRef}>
               <div className="chat-box-inner">
-                {messages.map((msg, i) => (
+              {messages.map((msg, i) => {
+                if (!msg || !msg.sender || !msg.text) return null
+                return (
                   <div key={i} className={msg.sender}>
                     <strong>{msg.sender === "ai" ? "DM" : playerName}:</strong>{" "}
                     <span
@@ -313,7 +315,9 @@ function App() {
                       }}
                     />
                   </div>
-                ))}
+                )
+              })}
+
               </div>
             </div>
 
