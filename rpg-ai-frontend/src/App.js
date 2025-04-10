@@ -130,7 +130,6 @@ function App() {
     setMessages((prev) => {
       const updated = [
         ...prev,
-        { sender: "player", text: msg },
         { sender: "ai", text: "🧙‍♂️ The Dungeon Master is thinking..." }
       ]
       setTimeout(scrollToBottom, 10)
