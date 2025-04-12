@@ -25,7 +25,7 @@ function App() {
   const [playerName, setPlayerName] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [input, setInput] = useState("")
-  const [messages, setMessages] = useState([])
+  const [chatTurns, setChatTurns] = useState([{ player: null, dm: "Welcome, adventurer. What do you do?" }])
   const [options, setOptions] = useState([])
   const [showActions, setShowActions] = useState(false)
   const [rollPrompt, setRollPrompt] = useState(null)
@@ -157,36 +157,58 @@ function App() {
     setOptions([])
     setRollPrompt(null)
     setLastPlayerQuestion(msg)
-
-    setMessages((prev) => [
+  
+    // Add new turn (player + loading DM)
+    setChatTurns((prev) => [
       ...prev,
-      !silent && { sender: "player", text: msg },
-      { sender: "ai", text: '<span class="thinking">🧙‍♂️ The Dungeon Master is thinking<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>' }
-    ].filter(Boolean))
-
+      { player: silent ? null : msg, dm: '<span class="thinking">🧙‍♂️ The Dungeon Master is thinking<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>' }
+    ])
     scrollToBottom()
-
+  
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: playerName, message: msg, sessionId }),
       })
+  
       const data = await res.json()
       const storyPart = data.response
       const choices = data.options || []
+  
       detectRollRequest(storyPart)
       extractMemory(storyPart)
-      await streamMessage(storyPart, () => {
-        setOptions(choices)
-        setShowActions(false)
-        setTimeout(scrollToBottom, 50)
+  
+      // Stream DM response into last turn
+      const words = storyPart.split(" ")
+      let accumulated = ""
+  
+      words.forEach((word, index) => {
+        setTimeout(() => {
+          accumulated += word + " "
+          setChatTurns((prev) => {
+            const updated = [...prev]
+            const last = updated[updated.length - 1]
+            last.dm = accumulated
+            return updated
+          })
+  
+          if (index === words.length - 1) {
+            setOptions(choices)
+            setShowActions(false)
+            scrollToBottom()
+          }
+        }, index * 40)
       })
     } catch (err) {
       console.error("Error:", err)
-      setMessages((prev) => [...prev, { sender: "ai", text: "⚠️ Something went wrong talking to the Dungeon Master." }])
+      setChatTurns((prev) => [
+        ...prev,
+        { player: msg, dm: "⚠️ Something went wrong talking to the Dungeon Master." }
+      ])
     }
   }
+  
 
   const handleNameSubmit = async (e) => {
     e.preventDefault()
@@ -272,19 +294,22 @@ function App() {
           <div className="column game-area">
             <div className="chat-box" ref={chatRef}>
               <div className="chat-box-inner">
-                {messages.map((msg, i) => {
-                  if (!msg || !msg.sender || typeof msg.text !== "string") return null
-                  return (
-                    <div key={i} className={msg.sender}>
-                      <strong>{msg.sender === "ai" ? "DM" : playerName}:</strong>{" "}
-                      <span
-                        dangerouslySetInnerHTML={{
-                          __html: msg.sender === "ai" ? highlightText(msg.text, highlights) : msg.text,
-                        }}
-                      />
-                    </div>
-                  )
-                })}
+                {chatTurns.map((turn, i) => (
+                  <div key={i}>
+                    {turn.player && (
+                      <div className="player">
+                        <strong>{playerName}:</strong> {turn.player}
+                      </div>
+                    )}
+                    {turn.dm && (
+                      <div className="ai">
+                        <strong>DM:</strong>{" "}
+                        <span dangerouslySetInnerHTML={{ __html: highlightText(turn.dm, highlights) }} />
+                      </div>
+                    )}
+                  </div>
+                ))}
+
               </div>
             </div>
 
