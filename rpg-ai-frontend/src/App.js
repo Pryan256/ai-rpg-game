@@ -193,7 +193,7 @@ function App() {
     if (!playerName.trim()) return
     setSubmitted(true)
     character.name = playerName
-    sendMessage("start")
+    sendMessage("start", true)
   }
 
   const handleOptionClick = (option) => {
