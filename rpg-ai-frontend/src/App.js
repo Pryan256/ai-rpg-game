@@ -105,7 +105,7 @@ function App() {
       if (!phrase || typeof phrase !== "string") return
       // eslint-disable-next-line no-useless-escape
       const escapedPhrase = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-      const regex = new RegExp(`\\b(${escapedPhrase})\\b`, "gi")
+      const regex = new RegExp("\\b(" + escapedPhrase + ")\\b", "gi")
       highlighted = highlighted.replace(regex, `<span class="highlight-${type}">$1</span>`)
     })
     return highlighted
