@@ -1,4 +1,3 @@
-// App.js
 "use client"
 
 import { useState, useRef } from "react"
@@ -26,8 +25,7 @@ function App() {
   const [playerName, setPlayerName] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [input, setInput] = useState("")
-  const [history, setHistory] = useState([])
-  const [currentTurn, setCurrentTurn] = useState([])
+  const [messages, setMessages] = useState([])
   const [options, setOptions] = useState([])
   const [showActions, setShowActions] = useState(false)
   const [rollPrompt, setRollPrompt] = useState(null)
@@ -51,20 +49,12 @@ function App() {
   })
 
   const chatRef = useRef()
-
   const scrollToBottom = () => {
     const el = chatRef.current
     if (el) {
       requestAnimationFrame(() => {
         el.scrollTop = el.scrollHeight
       })
-    }
-  }
-
-  const scrollToTop = () => {
-    const el = chatRef.current
-    if (el) {
-      el.scrollTop = 0
     }
   }
 
@@ -85,7 +75,7 @@ function App() {
   }
 
   const detectRollRequest = (text) => {
-    const match = text.match(/make (an?|a)?\s*(\w+)\s+check(?:\s*DC\s*(\d+))?/i)
+    const match = text.match(/make (an?|a)?\s*(\w+)\s+check(?:\s*$$DC\s*(\d+)$$)?/i)
     if (match) {
       const ability = match[2].charAt(0).toUpperCase() + match[2].slice(1).toLowerCase()
       const dc = match[3] ? Number.parseInt(match[3]) : null
@@ -103,10 +93,8 @@ function App() {
     let highlighted = text
     highlights.forEach(({ text: phrase, type }) => {
       if (!phrase || typeof phrase !== "string") return
-      const escapedPhrase = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-      const regex = new RegExp('\\b(' + escapedPhrase + ')\\b', 'gi')
-      highlighted = highlighted.replace(regex, '<span class="highlight-' + type + '">$1</span>')
-
+      const regex = new RegExp(`\\b(${phrase.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&")})\\b`, "gi")
+      highlighted = highlighted.replace(regex, `<span class="highlight-${type}">$1</span>`)
     })
     return highlighted
   }
@@ -137,13 +125,10 @@ function App() {
     const words = text.split(" ")
     let accumulated = ""
     await new Promise((resolve) => setTimeout(resolve, 50))
-
-    setCurrentTurn((prev) => [...prev, { sender: "ai", text: "" }])
-
     words.forEach((word, index) => {
       setTimeout(() => {
         accumulated += word + " "
-        setCurrentTurn((prev) => {
+        setMessages((prev) => {
           const updated = [...prev]
           const last = updated[updated.length - 1]
           if (last && last.sender === "ai") last.text = accumulated
@@ -157,17 +142,47 @@ function App() {
     })
   }
 
+  const handleNameSubmit = async (e) => {
+    e.preventDefault()
+    if (!playerName.trim()) return
+    setSubmitted(true)
+    character.name = playerName
+    setMessages([{ sender: "ai", text: '<span class="thinking">🧙‍♂️ The Dungeon Master is thinking<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>' }]) // placeholder for first DM message
+    scrollToBottom()
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: playerName, message: "start", sessionId }),
+      })
+      const data = await res.json()
+      const storyPart = data.response
+      const choices = data.options || []
+      detectRollRequest(storyPart)
+      extractMemory(storyPart)
+      await streamMessage(storyPart, () => {
+        setOptions(choices)
+      })
+    } catch (err) {
+      console.error("Error:", err)
+      setMessages([{ sender: "ai", text: "⚠️ Something went wrong getting your greeting." }])
+    }
+  }
+
   const sendMessage = async (msg = input, silent = false) => {
     if (!msg.trim()) return
     setInput("")
     setOptions([])
     setRollPrompt(null)
     setLastPlayerQuestion(msg)
-    setHistory((prev) => [...prev, ...currentTurn])
-    setCurrentTurn([{ sender: "player", text: msg }])
-
-    scrollToTop()
-
+    if (!silent) {
+      setMessages((prev) => [
+        ...prev,
+        { sender: "player", text: msg },
+        { sender: "ai", text: '<span class="thinking">🧙‍♂️ The Dungeon Master is thinking<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>' } // AI thinking placeholder
+      ])
+      scrollToBottom()
+    }
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
         method: "POST",
@@ -182,19 +197,15 @@ function App() {
       await streamMessage(storyPart, () => {
         setOptions(choices)
         setShowActions(false)
+        setTimeout(scrollToBottom, 50)
       })
     } catch (err) {
       console.error("Error:", err)
-      setCurrentTurn((prev) => [...prev, { sender: "ai", text: "⚠️ Something went wrong talking to the Dungeon Master." }])
+      setMessages((prev) => [
+        ...prev,
+        { sender: "ai", text: "⚠️ Something went wrong talking to the Dungeon Master." }
+      ])
     }
-  }
-
-  const handleNameSubmit = async (e) => {
-    e.preventDefault()
-    if (!playerName.trim()) return
-    setSubmitted(true)
-    character.name = playerName
-    sendMessage("start", true)
   }
 
   const handleOptionClick = (option) => {
@@ -224,7 +235,7 @@ function App() {
     const total = roll + mod
     const rollResult = `🎲 ${rollPrompt.ability} check${rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ""}: Rolled ${roll} + ${mod} = ${total}`
     const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.\nThis was in response to my question: "${lastPlayerQuestion}" and the DM's prompt: "${lastRollContext}"`
-    setCurrentTurn((prev) => [...prev, { sender: "player", text: rollResult }])
+    setMessages((prev) => [...prev, { sender: "player", text: rollResult }])
     sendMessage(playerMsg, true)
     setRollPrompt(null)
     setLastRollContext("")
@@ -273,18 +284,19 @@ function App() {
           <div className="column game-area">
             <div className="chat-box" ref={chatRef}>
               <div className="chat-box-inner">
-                {history.map((msg, i) => (
-                  <div key={i} className={msg.sender}>
-                    <strong>{msg.sender === "ai" ? "DM" : playerName}:</strong>{" "}
-                    <span dangerouslySetInnerHTML={{ __html: msg.sender === "ai" ? highlightText(msg.text, highlights) : msg.text }} />
-                  </div>
-                ))}
-                {currentTurn.map((msg, i) => (
-                  <div key={`c-${i}`} className={msg.sender}>
-                    <strong>{msg.sender === "ai" ? "DM" : playerName}:</strong>{" "}
-                    <span dangerouslySetInnerHTML={{ __html: msg.sender === "ai" ? highlightText(msg.text, highlights) : msg.text }} />
-                  </div>
-                ))}
+                {messages.map((msg, i) => {
+                  if (!msg || !msg.sender || typeof msg.text !== "string") return null
+                  return (
+                    <div key={i} className={msg.sender}>
+                      <strong>{msg.sender === "ai" ? "DM" : playerName}:</strong>{" "}
+                      <span
+                        dangerouslySetInnerHTML={{
+                          __html: msg.sender === "ai" ? highlightText(msg.text, highlights) : msg.text,
+                        }}
+                      />
+                    </div>
+                  )
+                })}
               </div>
             </div>
 
@@ -311,6 +323,7 @@ function App() {
                       {option}
                     </button>
                   ))}
+
                   {rollPrompt && (
                     <>
                       {lastRollContext && (
@@ -323,6 +336,7 @@ function App() {
                       </button>
                     </>
                   )}
+
                   <button onClick={clearMemory}>🧼 Clear Memory</button>
                 </div>
               )}
