@@ -1,7 +1,7 @@
 // App.js
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef } from "react" // Removed useEffect
 import "./App.css"
 import { v4 as uuidv4 } from "uuid"
 
@@ -103,7 +103,8 @@ function App() {
     let highlighted = text
     highlights.forEach(({ text: phrase, type }) => {
       if (!phrase || typeof phrase !== "string") return
-      const regex = new RegExp(`\\b(${phrase.replace(/[.*+?^${}()|[\\]\\\\]/g, "\\$&")})\\b`, "gi")
+      // eslint-disable-next-line no-useless-escape
+      const regex = new RegExp(`\b(${phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})\b`, "gi")
       highlighted = highlighted.replace(regex, `<span class="highlight-${type}">$1</span>`)
     })
     return highlighted
