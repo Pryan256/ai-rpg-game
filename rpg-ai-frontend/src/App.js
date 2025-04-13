@@ -103,12 +103,9 @@ function App() {
     let highlighted = text
     highlights.forEach(({ text: phrase, type }) => {
       if (!phrase || typeof phrase !== "string") return
-      // eslint-disable-next-line no-useless-escape
       const escapedPhrase = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
       const regex = new RegExp("\\b(" + escapedPhrase + ")\\b", "gi")
-      highlighted = highlighted.replace(regex, `<span class='highlight-${type}'>$1</span>`
-      )
-      
+      highlighted = highlighted.replace(regex, `<span class='highlight-${type}'>$1</span>`)
     })
     return highlighted
   }
