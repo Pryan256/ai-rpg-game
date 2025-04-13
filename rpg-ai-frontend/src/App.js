@@ -1,6 +1,7 @@
+// App.js
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import "./App.css"
 import { v4 as uuidv4 } from "uuid"
 
@@ -25,7 +26,8 @@ function App() {
   const [playerName, setPlayerName] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [input, setInput] = useState("")
-  const [messages, setMessages] = useState([])
+  const [history, setHistory] = useState([])
+  const [currentTurn, setCurrentTurn] = useState([])
   const [options, setOptions] = useState([])
   const [showActions, setShowActions] = useState(false)
   const [rollPrompt, setRollPrompt] = useState(null)
@@ -49,12 +51,20 @@ function App() {
   })
 
   const chatRef = useRef()
+
   const scrollToBottom = () => {
     const el = chatRef.current
     if (el) {
       requestAnimationFrame(() => {
         el.scrollTop = el.scrollHeight
       })
+    }
+  }
+
+  const scrollToTop = () => {
+    const el = chatRef.current
+    if (el) {
+      el.scrollTop = 0
     }
   }
 
@@ -126,18 +136,12 @@ function App() {
     let accumulated = ""
     await new Promise((resolve) => setTimeout(resolve, 50))
 
-    setMessages((prev) => {
-      const last = prev[prev.length - 1]
-      if (!last || last.sender !== "ai") {
-        return [...prev, { sender: "ai", text: "" }]
-      }
-      return prev
-    })
+    setCurrentTurn((prev) => [...prev, { sender: "ai", text: "" }])
 
     words.forEach((word, index) => {
       setTimeout(() => {
         accumulated += word + " "
-        setMessages((prev) => {
+        setCurrentTurn((prev) => {
           const updated = [...prev]
           const last = updated[updated.length - 1]
           if (last && last.sender === "ai") last.text = accumulated
@@ -157,14 +161,10 @@ function App() {
     setOptions([])
     setRollPrompt(null)
     setLastPlayerQuestion(msg)
+    setHistory((prev) => [...prev, ...currentTurn])
+    setCurrentTurn([{ sender: "player", text: msg }])
 
-    setMessages((prev) => [
-      ...prev,
-      !silent && { sender: "player", text: msg },
-      { sender: "ai", text: '<span class="thinking">🧙‍♂️ The Dungeon Master is thinking<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></span>' }
-    ].filter(Boolean))
-
-    scrollToBottom()
+    scrollToTop()
 
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/message`, {
@@ -180,11 +180,10 @@ function App() {
       await streamMessage(storyPart, () => {
         setOptions(choices)
         setShowActions(false)
-        setTimeout(scrollToBottom, 50)
       })
     } catch (err) {
       console.error("Error:", err)
-      setMessages((prev) => [...prev, { sender: "ai", text: "⚠️ Something went wrong talking to the Dungeon Master." }])
+      setCurrentTurn((prev) => [...prev, { sender: "ai", text: "⚠️ Something went wrong talking to the Dungeon Master." }])
     }
   }
 
@@ -222,8 +221,8 @@ function App() {
     const mod = statModifier(character.stats[statKey])
     const total = roll + mod
     const rollResult = `🎲 ${rollPrompt.ability} check${rollPrompt.dc ? ` (DC ${rollPrompt.dc})` : ""}: Rolled ${roll} + ${mod} = ${total}`
-    const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.\nThis was in response to my question: "${lastPlayerQuestion}" and the DM's prompt: "${lastRollContext}"`
-    setMessages((prev) => [...prev, { sender: "player", text: rollResult }])
+    const playerMsg = `I rolled a ${total} on my ${rollPrompt.ability} check.\nThis was in response to my question: \"${lastPlayerQuestion}\" and the DM's prompt: \"${lastRollContext}\"`
+    setCurrentTurn((prev) => [...prev, { sender: "player", text: rollResult }])
     sendMessage(playerMsg, true)
     setRollPrompt(null)
     setLastRollContext("")
@@ -272,19 +271,18 @@ function App() {
           <div className="column game-area">
             <div className="chat-box" ref={chatRef}>
               <div className="chat-box-inner">
-                {messages.map((msg, i) => {
-                  if (!msg || !msg.sender || typeof msg.text !== "string") return null
-                  return (
-                    <div key={i} className={msg.sender}>
-                      <strong>{msg.sender === "ai" ? "DM" : playerName}:</strong>{" "}
-                      <span
-                        dangerouslySetInnerHTML={{
-                          __html: msg.sender === "ai" ? highlightText(msg.text, highlights) : msg.text,
-                        }}
-                      />
-                    </div>
-                  )
-                })}
+                {history.map((msg, i) => (
+                  <div key={i} className={msg.sender}>
+                    <strong>{msg.sender === "ai" ? "DM" : playerName}:</strong>{" "}
+                    <span dangerouslySetInnerHTML={{ __html: msg.sender === "ai" ? highlightText(msg.text, highlights) : msg.text }} />
+                  </div>
+                ))}
+                {currentTurn.map((msg, i) => (
+                  <div key={`c-${i}`} className={msg.sender}>
+                    <strong>{msg.sender === "ai" ? "DM" : playerName}:</strong>{" "}
+                    <span dangerouslySetInnerHTML={{ __html: msg.sender === "ai" ? highlightText(msg.text, highlights) : msg.text }} />
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -311,7 +309,6 @@ function App() {
                       {option}
                     </button>
                   ))}
-
                   {rollPrompt && (
                     <>
                       {lastRollContext && (
@@ -324,7 +321,6 @@ function App() {
                       </button>
                     </>
                   )}
-
                   <button onClick={clearMemory}>🧼 Clear Memory</button>
                 </div>
               )}
