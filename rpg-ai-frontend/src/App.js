@@ -104,8 +104,9 @@ function App() {
     highlights.forEach(({ text: phrase, type }) => {
       if (!phrase || typeof phrase !== "string") return
       const escapedPhrase = phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-      const regex = new RegExp("\\b(" + escapedPhrase + ")\\b", "gi")
-      highlighted = highlighted.replace(regex, `<span class='highlight-${type}'>$1</span>`)
+      const regex = new RegExp('\\b(' + escapedPhrase + ')\\b', 'gi')
+      highlighted = highlighted.replace(regex, '<span class="highlight-' + type + '">$1</span>')
+
     })
     return highlighted
   }
