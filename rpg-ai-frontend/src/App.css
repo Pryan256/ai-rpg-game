@@ -139,7 +139,7 @@ button:hover {
   min-height: 0;
   scroll-behavior: smooth;
   overscroll-behavior: contain;
-  height: 100%;
+  height: 90%;
 }
 
 .chat-box-inner {
